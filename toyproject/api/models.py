@@ -87,5 +87,6 @@ class Diary(models.Model):
         validators=[MaxValueValidator(100), MinValueValidator(1)]
     )
     image = models.ImageField()
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     likes = GenericRelation(Like)
