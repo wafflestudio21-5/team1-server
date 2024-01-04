@@ -56,11 +56,12 @@ class Todo(models.Model):
     title = models.CharField(max_length=32)
     description = models.TextField()
     reminder = models.DateTimeField()
-    created_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
-    is_completed = models.BooleanField()
+    is_completed = models.BooleanField(default=False)
     goal = models.ForeignKey(Goal, on_delete=models.CASCADE)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     likes = GenericRelation(Like)
 
     def __str__(self):
