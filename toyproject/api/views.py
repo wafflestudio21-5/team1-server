@@ -2,7 +2,14 @@ from rest_framework.generics import CreateAPIView, ListCreateAPIView, RetrieveUp
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin
 from .serializers import TodoSerializer, GoalSerializer, DiarySerializer
-from .models import Goal, Todo, Diary
+from .models import Goal, Todo, Diary, User
+
+from django.core.exceptions import ObjectDoesNotExist
+
+from rest_framework import status
+from rest_framework.response import Response
+
+from django.http import Http404
     
 class GoalListCreateAPIView(ListCreateAPIView):
     serializer_class = GoalSerializer
@@ -12,7 +19,12 @@ class GoalListCreateAPIView(ListCreateAPIView):
         return serializer.save(created_by=self.request.user)
     
     def get_queryset(self):
-        return Goal.objects.filter(created_by=self.request.user)
+        user_id = self.kwargs.get('user_id')
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            raise Http404("Error: User not found")
+        return Goal.objects.filter(created_by=user)
 
 class GoalDetailAPIView(RetrieveUpdateDestroyAPIView):
     serializer_class = GoalSerializer
@@ -20,7 +32,12 @@ class GoalDetailAPIView(RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        return Goal.objects.filter(created_by=self.request.user)
+        user_id = self.kwargs.get('user_id')
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            raise Http404("Error: User not found")
+        return Goal.objects.filter(created_by=user)
 
 class TodoListCreateAPIView(ListCreateAPIView):
     serializer_class = TodoSerializer
@@ -32,7 +49,12 @@ class TodoListCreateAPIView(ListCreateAPIView):
     
     def get_queryset(self):
         goal_id = self.kwargs.get('goal_id')
-        return Todo.objects.filter(created_by=self.request.user, goal=Goal.objects.get(id=goal_id))
+        user_id = self.kwargs.get('user_id')
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            raise Http404("Error: User not found")
+        return Todo.objects.filter(created_by=user, goal=Goal.objects.get(id=goal_id))
     
 class TodoDetailAPIView(RetrieveUpdateDestroyAPIView):
     serializer_class = TodoSerializer
@@ -40,7 +62,12 @@ class TodoDetailAPIView(RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        return Todo.objects.filter(created_by=self.request.user)
+        user_id = self.kwargs.get('user_id')
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            raise Http404("Error: User not found")
+        return Todo.objects.filter(created_by=user)
 
 class DiaryCreateAPIView(CreateAPIView):
     serializer_class = DiarySerializer
@@ -54,7 +81,8 @@ class DiaryListAPIView(ListAPIView):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        return Diary.objects.filter(created_by=self.request.user)
+        user_id = self.kwargs.get('user_id')
+        return Diary.objects.filter(created_by=User.objects.get(id=user_id))
     
 class DiaryDetailAPIView(RetrieveUpdateDestroyAPIView):
     serializer_class = DiarySerializer
@@ -62,4 +90,5 @@ class DiaryDetailAPIView(RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        return Diary.objects.filter(created_by=self.request.user)
+        user_id = self.kwargs.get('user_id')
+        return Diary.objects.filter(created_by=User.objects.get(id=user_id))

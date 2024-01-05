@@ -12,12 +12,24 @@ class TodoSerializer(serializers.ModelSerializer):
             'end_date',
         ]
 
+class TodoConciseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Todo
+        fields = [
+            'title', 
+            'reminder',
+        ]
+
 class GoalSerializer(serializers.ModelSerializer):
+
+    todo_set = TodoConciseSerializer(many=True, read_only=True)
+
     class Meta:
         model = Goal
         fields = [
             'title', 
             'visibility',
+            'todo_set',
         ]
 
 class DiarySerializer(serializers.ModelSerializer):
