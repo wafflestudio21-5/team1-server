@@ -1,7 +1,16 @@
 asgiref==3.7.2
+attrs==23.2.0
 Django==5.0
 django-rest-framework==0.1.0
 djangorestframework==3.14.0
+drf-spectacular==0.27.0
+inflection==0.5.1
+jsonschema==4.20.0
+jsonschema-specifications==2023.12.1
 Pillow==10.1.0
 pytz==2023.3.post1
+PyYAML==6.0.1
+referencing==0.32.0
+rpds-py==0.16.2
 sqlparse==0.4.4
+uritemplate==4.1.1
