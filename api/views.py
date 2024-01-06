@@ -13,7 +13,6 @@ from django.http import Http404
     
 class GoalListCreateAPIView(ListCreateAPIView):
     serializer_class = GoalSerializer
-    permission_classes = (IsAuthenticated,)
 
     def perform_create(self, serializer):
         return serializer.save(created_by=self.request.user)
@@ -30,7 +29,6 @@ class GoalListCreateAPIView(ListCreateAPIView):
 class GoalDetailAPIView(RetrieveUpdateDestroyAPIView):
     serializer_class = GoalSerializer
     lookup_url_kwarg = 'goal_id'
-    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         user_id = self.kwargs.get('user_id')
@@ -42,7 +40,6 @@ class GoalDetailAPIView(RetrieveUpdateDestroyAPIView):
 
 class TodoListCreateAPIView(ListCreateAPIView):
     serializer_class = TodoConciseSerializer
-    permission_classes = (IsAuthenticated,)
 
     def perform_create(self, serializer):
         goal_id = self.kwargs.get('goal_id')
@@ -60,7 +57,6 @@ class TodoListCreateAPIView(ListCreateAPIView):
 class TodoDetailAPIView(RetrieveUpdateDestroyAPIView):
     serializer_class = TodoSerializer
     lookup_url_kwarg = 'todo_id'
-    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         user_id = self.kwargs.get('user_id')
@@ -72,14 +68,12 @@ class TodoDetailAPIView(RetrieveUpdateDestroyAPIView):
 
 class DiaryCreateAPIView(CreateAPIView):
     serializer_class = DiarySerializer
-    permission_classes = (IsAuthenticated,)
 
     def perform_create(self, serializer):
         return serializer.save(created_by=self.request.user)
     
 class DiaryListAPIView(ListAPIView):
     serializer_class = DiarySerializer
-    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         user_id = self.kwargs.get('user_id')
@@ -89,11 +83,9 @@ class DiaryDetailAPIView(RetrieveUpdateDestroyAPIView):
     serializer_class = DiarySerializer
     queryset = Diary.objects.all()
     lookup_url_kwarg = 'diary_id'
-    permission_classes = (IsAuthenticated,)
     
 class FollowRelationAPIView(RetrieveAPIView):
     serializer_class = FollowRelationSerializer
     queryset = User.objects.all()
     lookup_url_kwarg = 'user_id'
-    permission_classes = (IsAuthenticated,)
 
