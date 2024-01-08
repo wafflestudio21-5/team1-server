@@ -10,6 +10,7 @@ from rest_framework import status
 from rest_framework.response import Response
 
 from django.http import Http404
+
     
 class GoalListCreateAPIView(ListCreateAPIView):
     serializer_class = GoalSerializer
