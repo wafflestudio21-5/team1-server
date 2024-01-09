@@ -35,7 +35,7 @@ class Profile(models.Model):
         if not self.display_name:
             self.display_name = self.user.username
         super(Profile, self).save(*args, **kwargs)
-    
+
     def __str__(self):
         return self.user.username + "'s Profile"
 

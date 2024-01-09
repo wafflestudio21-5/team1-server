@@ -113,3 +113,10 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = '__all__'
+
+    def to_representation(self, instance):
+        representation = super(ProfileSerializer, self).to_representation(instance)
+        representation['follower_count'] = instance.user.followers.count()
+        representation['following_count'] = instance.user.following.count()
+
+        return representation

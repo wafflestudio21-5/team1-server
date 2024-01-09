@@ -93,4 +93,6 @@ class ProfileDetailAPIView(RetrieveUpdateAPIView):
     serializer_class = ProfileSerializer
     queryset = Profile.objects.all()
     lookup_url_kwarg = 'user_id'
+    
+
 
