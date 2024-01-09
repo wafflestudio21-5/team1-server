@@ -8,6 +8,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelatio
 from datetime import date
 
 # Create your models here.
+
 class User(AbstractUser):
     username = models.CharField(max_length=15, unique=True)
     email = models.EmailField()
@@ -18,6 +19,26 @@ class User(AbstractUser):
     def __str__(self):
         return self.username
     
+class Profile(models.Model):
+    user = models.OneToOneField(
+        User, 
+        related_name='profile',
+        on_delete=models.CASCADE, 
+        primary_key=True
+    )
+    intro = models.TextField(null=True, blank=True)
+    display_name = models.CharField(max_length=15, null=True, blank=True, default=None)
+    profile_pic = models.ImageField(null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        # If display_name is not provided, set it to the username of the associated User.
+        if not self.display_name:
+            self.display_name = self.user.username
+        super(Profile, self).save(*args, **kwargs)
+    
+    def __str__(self):
+        return self.user.username + "'s Profile"
+
 class Goal(models.Model):
     title = models.CharField(max_length=64)
     
@@ -43,7 +64,7 @@ class Goal(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.title
+        return f'{self.title} by {self.created_by}'
 
 class Like(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -53,7 +74,7 @@ class Like(models.Model):
     liked_object = GenericForeignKey('content_type', 'object_id')
 
     def __str__(self):
-        return f"({self.user}, {self.liked_object})"
+        return f"like by {self.user} on {self.liked_object}"
 
 class Todo(models.Model):
     title = models.CharField(max_length=32)
@@ -89,10 +110,18 @@ class Diary(models.Model):
         default=50,
         validators=[MaxValueValidator(100), MinValueValidator(1)]
     )
-    image = models.ImageField()
+    image = models.ImageField(null=True, blank=True)
+    emoji = models.IntegerField(
+        default=1,
+        validators=[MaxValueValidator(10), MinValueValidator(1)]
+    )
+    color = models.CharField(max_length=25, default='white')
     created_by = models.ForeignKey(User, related_name='diarys', on_delete=models.CASCADE)
     date = models.DateField(default=date.today)
     likes = GenericRelation(Like)
+
+    def __str__(self):
+        return f"{self.date} diary by {self.created_by}"
 
 
 class Comment(models.Model):
@@ -103,4 +132,4 @@ class Comment(models.Model):
     likes = GenericRelation(Like)
 
     def __str__(self):
-        return f"({self.user}, {self.diary})"
+        return f"comment by {self.user} on {self.diary}"

@@ -27,12 +27,14 @@ SECRET_KEY = 'django-insecure-=56*$7b2ttkspdw=c$yqi3wq6_xdm4xy2=82ltpj94h^e8pi#i
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['toyproject-envs.eba-hwxrhnpx.ap-northeast-2.elasticbeanstalk.com']
+ALLOWED_HOSTS = ['*']
+# ALLOWED_HOSTS = ['toyproject-envs.eba-hwxrhnpx.ap-northeast-2.elasticbeanstalk.com']
 
 
 # Application definition
 
 INSTALLED_APPS = [
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -46,6 +48,9 @@ INSTALLED_APPS = [
 
     # Local apps
     'api',
+
+
+
 ]
 
 MIDDLEWARE = [

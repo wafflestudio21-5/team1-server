@@ -1,8 +1,8 @@
-from rest_framework.generics import CreateAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView, RetrieveAPIView
+from rest_framework.generics import CreateAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView, RetrieveAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin
-from .serializers import TodoSerializer, GoalSerializer, DiarySerializer, FollowRelationSerializer, TodoConciseSerializer
-from .models import Goal, Todo, Diary, User
+from .serializers import TodoSerializer, GoalSerializer, DiarySerializer, FollowRelationSerializer, TodoConciseSerializer, ProfileSerializer
+from .models import Goal, Todo, Diary, User, Profile
 
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -87,5 +87,10 @@ class DiaryDetailAPIView(RetrieveUpdateDestroyAPIView):
 class FollowRelationAPIView(RetrieveAPIView):
     serializer_class = FollowRelationSerializer
     queryset = User.objects.all()
+    lookup_url_kwarg = 'user_id'
+
+class ProfileDetailAPIView(RetrieveUpdateAPIView):
+    serializer_class = ProfileSerializer
+    queryset = Profile.objects.all()
     lookup_url_kwarg = 'user_id'
 

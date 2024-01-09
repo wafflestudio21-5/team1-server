@@ -4,7 +4,8 @@ from . import views
 urlpatterns = [
 
     # profile / following_followers
-    path('<int:user_id>', views.FollowRelationAPIView.as_view()),
+    path('<int:user_id>', views.ProfileDetailAPIView.as_view()),
+    path('<int:user_id>/follows', views.FollowRelationAPIView.as_view()),
 
     # goal, todo API views
     path('<int:user_id>/goals', views.GoalListCreateAPIView.as_view()),

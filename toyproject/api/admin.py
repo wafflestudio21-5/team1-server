@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.contenttypes.admin import GenericTabularInline
-from .models import User, Goal, Diary, Like, Todo, Comment
+from .models import User, Goal, Diary, Like, Todo, Comment, Profile
 
 class LikeInline(GenericTabularInline):
     model = Like
@@ -39,3 +39,4 @@ admin.site.register(Diary, DiaryAdmin)
 admin.site.register(Like)
 admin.site.register(Todo, TodoAdmin)
 admin.site.register(Comment, CommentAdmin)
+admin.site.register(Profile)

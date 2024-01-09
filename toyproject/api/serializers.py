@@ -80,6 +80,8 @@ class DiarySerializer(serializers.ModelSerializer):
             'description',
             'visibility',
             'mood',
+            'color',
+            'emoji',
             'image',
             'created_by',
             'date',
@@ -107,3 +109,7 @@ class FollowRelationSerializer(serializers.ModelSerializer):
             'followers',
         ]
 
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = '__all__'
