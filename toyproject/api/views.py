@@ -10,6 +10,10 @@ from rest_framework import status
 from rest_framework.response import Response
 
 from django.http import Http404
+
+from django.shortcuts import get_object_or_404
+
+from datetime import datetime
     
 class GoalListCreateAPIView(ListCreateAPIView):
     serializer_class = GoalSerializer
@@ -70,7 +74,10 @@ class DiaryCreateAPIView(CreateAPIView):
     serializer_class = DiarySerializer
 
     def perform_create(self, serializer):
-        return serializer.save(created_by=self.request.user)
+        if self.request.user is User:
+            return serializer.save(created_by=self.request.user)
+        else:
+            return serializer.save(created_by=User.objects.get(id=3))
     
 class DiaryListAPIView(ListAPIView):
     serializer_class = DiarySerializer
@@ -81,8 +88,12 @@ class DiaryListAPIView(ListAPIView):
     
 class DiaryDetailAPIView(RetrieveUpdateDestroyAPIView):
     serializer_class = DiarySerializer
-    queryset = Diary.objects.all()
-    lookup_url_kwarg = 'diary_id'
+
+    def get_object(self):
+        date = datetime.strptime(self.kwargs['date'], '%Y-%m-%d').date()
+        obj = Diary.objects.get(created_by_id=self.kwargs['user_id'], date=date)
+        return obj
+
     
 class FollowRelationAPIView(RetrieveAPIView):
     serializer_class = FollowRelationSerializer
