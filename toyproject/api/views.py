@@ -1,6 +1,7 @@
 from rest_framework.generics import CreateAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView, RetrieveAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin
+from .serializers import SignUpSerializer, SignUpKakaoSerializer, EmailLoginSerializer, KakaoLoginSerializer
 from .serializers import TodoSerializer, GoalSerializer, DiarySerializer, FollowRelationSerializer, TodoConciseSerializer, ProfileSerializer
 from .models import Goal, Todo, Diary, User, Profile
 
@@ -10,6 +11,120 @@ from rest_framework import status
 from rest_framework.response import Response
 
 from django.http import Http404
+
+class SignUpAPIView(CreateAPIView):
+    serializer_class = SignUpSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = SignUpSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            return Response({
+                "result_code" : 0,
+                "result" : "SUCCESS",
+                "error_msg" : "",
+                "token" : "10100010sdfasdfas"
+                "user_id" : user.id
+            }, status=status.HTTP_200_OK)
+        return Response({
+            "result_code" : 1,
+            "result" : "FAIL",
+            "error_msg" : serializer.errors,
+            "token" : ""
+            "user_id" : ""
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class SignUpKakaoAPIView(CreateAPIView):
+    serializer_class = SignUpKakaoSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = SignUpKakaoSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            return Response({
+                "result_code" : 0,
+                "result" : "SUCCESS",
+                "error_msg" : "",
+                "token" : "10100010sdfasdfas"
+                "kakao_id" : user.kakao_id
+                "user_id" : user.id
+            }, status=status.HTTP_200_OK)
+        return Response({
+            "result_code" : 1,
+            "result" : "FAIL",
+            "error_msg" : serializer.errors,
+            "token" : ""
+            "kakao_id" : ""
+            "user_id" : ""
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class LoginGuestAPIView(CreateAPIView):
+    def get(self, request, *args, **kwargs):
+        return Response({
+            "token": "10100010sdfasdfas"
+        }, status=status.HTTP_200_OK)
+
+class LoginEmailAPIView(CreateAPIView):
+    serializer_class = EmailLoginSerializer
+    
+    def post(self, request, *args, **kwargs):
+        serializer = EmailLoginSerializer(data=request.data)
+
+        if serializer.is_valid():
+            try:
+                user = User.objects.get(email=serializer.validated_data['email'])
+            except ObjectDoesNotExist:
+                return Response({
+                    "result_code" : 1,
+                    "result" : "FAIL",
+                    "error_msg" : "User does not exist",
+                    "token" : ""
+                }, status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                "result_code" : 0,
+                "result" : "SUCCESS",
+                "error_msg" : "",
+                "token" : "10100010sdfasdfas"
+            }, status=status.HTTP_200_OK)
+        return Response({
+            "result_code" : 1,
+            "result" : "FAIL",
+            "error_msg" : serializer.errors,
+            "token" : ""
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+class LoginKakaoAPIView(CreateAPIView):
+    serializer_class = KakaoLoginSerializer
+    
+    def post(self, request, *args, **kwargs):
+        serializer = KakaoLoginSerializer(data=request.data)
+        if serializer.is_valid():
+            try: 
+                user = User.objects.get(kakao_id=serializer.validated_data['kakao_id'])
+            except ObjectDoesNotExist:
+                return Response({
+                    "result_code" : 2,
+                    "result" : "FAIL",
+                    "error_msg" : "KaKao User needs to sign up",
+                    "token" : ""
+                }, status=status.HTTP_200_OK)
+            user = serializer.validated_data
+            return Response({
+                "result_code" : 0,
+                "result" : "SUCCESS",
+                "error_msg" : "",
+                "token" : "10100010sdfasdfas"
+            }, status=status.HTTP_200_OK)
+        return Response({
+            "result_code" : 1,
+            "result" : "FAIL",
+            "error_msg" : serializer.errors,
+            "token" : ""
+        }, status=status.HTTP_400_BAD_REQUEST)
+
     
 class GoalListCreateAPIView(ListCreateAPIView):
     serializer_class = GoalSerializer

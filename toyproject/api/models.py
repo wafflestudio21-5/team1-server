@@ -12,6 +12,7 @@ from datetime import date
 class User(AbstractUser):
     username = models.CharField(max_length=15, unique=True)
     email = models.EmailField()
+    kakao_id = models.IntegerField(null=True, blank=True)
     password = models.CharField(max_length=128)
     created_at = models.DateTimeField(auto_now_add=True)
     following = models.ManyToManyField('self', related_name='followers', symmetrical=False)
