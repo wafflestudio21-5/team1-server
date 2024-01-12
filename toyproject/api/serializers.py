@@ -1,6 +1,38 @@
 from rest_framework import serializers
 from .models import *
 
+class SignUpSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            'username',
+            'email',
+            'password',
+        ]
+
+class SignUpKakaoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            'username',
+            'kakao_id',
+        ]
+
+class EmailLoginSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            'email',
+            'password',
+        ]
+
+class KakaoLoginSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            'kakao_id',
+        ]
+
 class LikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Like
