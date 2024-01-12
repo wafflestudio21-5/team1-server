@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     # External packages
     'rest_framework',
     'drf_spectacular',
+    'rest_framework.authtoken',
 
     # Local apps
     'api',

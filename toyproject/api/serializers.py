@@ -5,7 +5,6 @@ class SignUpSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'username',
             'email',
             'password',
         ]
@@ -14,7 +13,6 @@ class SignUpKakaoSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'username',
             'kakao_id',
         ]
 

@@ -18,14 +18,24 @@ class SignUpAPIView(CreateAPIView):
     def post(self, request, *args, **kwargs):
         serializer = SignUpSerializer(data=request.data)
         if serializer.is_valid():
-            user = serializer.save()
-            return Response({
-                "result_code" : 0,
-                "result" : "SUCCESS",
-                "error_msg" : "",
-                "token" : "10100010sdfasdfas",
-                "user_id" : user.id
-            }, status=status.HTTP_200_OK)
+            try: 
+                user = User.objects.get(email=serializer.validated_data['email'])
+                return Response({
+                    "result_code" : 1,
+                    "result" : "FAIL",
+                    "error_msg" : "User already exists",
+                    "token" : "",
+                    "user_id" : ""
+                }, status=status.HTTP_200_OK)
+            except ObjectDoesNotExist:
+                user = serializer.save()
+                return Response({
+                    "result_code" : 0,
+                    "result" : "SUCCESS",
+                    "error_msg" : "",
+                    "token" : "10100010sdfasdfasemail",
+                    "user_id" : user.id
+                }, status=status.HTTP_200_OK)
         return Response({
             "result_code" : 1,
             "result" : "FAIL",
@@ -46,7 +56,7 @@ class SignUpKakaoAPIView(CreateAPIView):
                 "result_code" : 0,
                 "result" : "SUCCESS",
                 "error_msg" : "",
-                "token" : "10100010sdfasdfas",
+                "token" : "10100010sdfasdfaskakao",
                 "kakao_id" : user.kakao_id,
                 "user_id" : user.id
             }, status=status.HTTP_200_OK)
@@ -61,10 +71,12 @@ class SignUpKakaoAPIView(CreateAPIView):
 
 
 
-class LoginGuestAPIView(CreateAPIView):
+class SignUpGuestAPIView(CreateAPIView):
     def get(self, request, *args, **kwargs):
+        user = User.objects.create();
         return Response({
-            "token": "10100010sdfasdfas"
+            "token": "10100010sdfasdfas",
+            "user_id": user.id
         }, status=status.HTTP_200_OK)
 
 class LoginEmailAPIView(CreateAPIView):
@@ -87,7 +99,7 @@ class LoginEmailAPIView(CreateAPIView):
                 "result_code" : 0,
                 "result" : "SUCCESS",
                 "error_msg" : "",
-                "token" : "10100010sdfasdfas"
+                "token" : "10100010sdfasdfasemail"
             }, status=status.HTTP_200_OK)
         return Response({
             "result_code" : 1,
@@ -116,7 +128,7 @@ class LoginKakaoAPIView(CreateAPIView):
                 "result_code" : 0,
                 "result" : "SUCCESS",
                 "error_msg" : "",
-                "token" : "10100010sdfasdfas"
+                "token" : "10100010sdfasdfaskakao"
             }, status=status.HTTP_200_OK)
         return Response({
             "result_code" : 1,
