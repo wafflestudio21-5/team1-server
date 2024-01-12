@@ -28,7 +28,7 @@ class SignUpAPIView(CreateAPIView):
                     "user_id" : ""
                 }, status=status.HTTP_200_OK)
             except ObjectDoesNotExist:
-                user = serializer.save()
+                user = serializer.save(username=serializer.validated_data['email'])
                 return Response({
                     "result_code" : 0,
                     "result" : "SUCCESS",
@@ -51,7 +51,7 @@ class SignUpKakaoAPIView(CreateAPIView):
     def post(self, request, *args, **kwargs):
         serializer = SignUpKakaoSerializer(data=request.data)
         if serializer.is_valid():
-            user = serializer.save()
+            user = serializer.save(username="kakao" + serializer.validated_data['kakao_id'])
             return Response({
                 "result_code" : 0,
                 "result" : "SUCCESS",
@@ -73,7 +73,7 @@ class SignUpKakaoAPIView(CreateAPIView):
 
 class SignUpGuestAPIView(CreateAPIView):
     def get(self, request, *args, **kwargs):
-        user = User.objects.create();
+        user = User.objects.create(username="guest" + str(User.objects.count()));
         return Response({
             "token": "10100010sdfasdfas",
             "user_id": user.id
