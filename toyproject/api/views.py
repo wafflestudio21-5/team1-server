@@ -23,14 +23,14 @@ class SignUpAPIView(CreateAPIView):
                 "result_code" : 0,
                 "result" : "SUCCESS",
                 "error_msg" : "",
-                "token" : "10100010sdfasdfas"
+                "token" : "10100010sdfasdfas",
                 "user_id" : user.id
             }, status=status.HTTP_200_OK)
         return Response({
             "result_code" : 1,
             "result" : "FAIL",
             "error_msg" : serializer.errors,
-            "token" : ""
+            "token" : "",
             "user_id" : ""
         }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -46,16 +46,16 @@ class SignUpKakaoAPIView(CreateAPIView):
                 "result_code" : 0,
                 "result" : "SUCCESS",
                 "error_msg" : "",
-                "token" : "10100010sdfasdfas"
-                "kakao_id" : user.kakao_id
+                "token" : "10100010sdfasdfas",
+                "kakao_id" : user.kakao_id,
                 "user_id" : user.id
             }, status=status.HTTP_200_OK)
         return Response({
             "result_code" : 1,
             "result" : "FAIL",
             "error_msg" : serializer.errors,
-            "token" : ""
-            "kakao_id" : ""
+            "token" : "",
+            "kakao_id" : "",
             "user_id" : ""
         }, status=status.HTTP_400_BAD_REQUEST)
 
