@@ -77,6 +77,7 @@ class TodoConciseSerializer(serializers.ModelSerializer):
             'id',
             'title', 
             'description',
+            'reminder',
             'created_at',
             'date',
             'is_completed',
