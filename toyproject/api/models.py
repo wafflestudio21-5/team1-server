@@ -10,15 +10,19 @@ from datetime import date
 # Create your models here.
 
 class User(AbstractUser):
-    username = models.CharField(max_length=15, unique=True)
-    email = models.EmailField()
-    kakao_id = models.IntegerField(null=True, blank=True)
+    username = None
+    EMAIL_FIELD = 'email'
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+
+    email = models.EmailField(null=True, unique=True)
+    kakao_id = models.IntegerField(null=True, unique=True)
     password = models.CharField(max_length=128)
     created_at = models.DateTimeField(auto_now_add=True)
     following = models.ManyToManyField('self', related_name='followers', symmetrical=False)
 
     def __str__(self):
-        return self.username
+        return str(self.id)
     
 class Profile(models.Model):
     user = models.OneToOneField(
@@ -28,17 +32,14 @@ class Profile(models.Model):
         primary_key=True
     )
     intro = models.TextField(null=True, blank=True)
-    display_name = models.CharField(max_length=15, null=True, blank=True, default=None)
+    username = models.CharField(max_length=15, unique=True)
     profile_pic = models.ImageField(null=True, blank=True)
 
-    def save(self, *args, **kwargs):
-        # If display_name is not provided, set it to the username of the associated User.
-        if not self.display_name:
-            self.display_name = self.user.username
-        super(Profile, self).save(*args, **kwargs)
-
     def __str__(self):
-        return self.user.username + "'s Profile"
+        if not self.username:
+            return 'null'
+        else:
+            return self.username
 
 class Goal(models.Model):
     title = models.CharField(max_length=64)

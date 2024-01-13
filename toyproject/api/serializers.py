@@ -5,7 +5,6 @@ class SignUpSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'username',
             'email',
             'password',
         ]
@@ -14,7 +13,6 @@ class SignUpKakaoSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'username',
             'kakao_id',
         ]
 
@@ -121,12 +119,22 @@ class DiarySerializer(serializers.ModelSerializer):
             'comments',
         ]
 
+class ProfileConciseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = [
+            'username'
+        ]
+
 class FollowSerializer(serializers.ModelSerializer):
+    
+    profile = ProfileConciseSerializer(read_only=True)
+
     class Meta:
         model = User
         fields = [
             'id',
-            'username'
+            'profile',
         ]
 
 class FollowRelationSerializer(serializers.ModelSerializer):
@@ -142,6 +150,7 @@ class FollowRelationSerializer(serializers.ModelSerializer):
         ]
 
 class ProfileSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Profile
         fields = '__all__'

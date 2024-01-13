@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     # External packages
     'rest_framework',
     'drf_spectacular',
+    'rest_framework.authtoken',
 
     # Local apps
     'api',
@@ -149,3 +150,6 @@ REST_FRAMEWORK = {
 SPECTACULAR_SETTINGS = {
     'TITLE': 'WaToMate API Documentation',
 }
+
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_USERNAME_REQUIRED = False
