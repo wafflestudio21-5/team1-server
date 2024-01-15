@@ -23,6 +23,8 @@ from django.http import Http404
 
 from django.shortcuts import get_object_or_404
 
+from django.db.models import Q
+
 from datetime import datetime
 
 from rest_framework.pagination import CursorPagination
@@ -260,7 +262,7 @@ class DiaryFeedListAPIView(ListAPIView):
     def get_queryset(self):
         user_id = self.kwargs.get('user_id')
         user = User.objects.get(id=user_id)
-        queryset = Diary.objects.filter(created_by__in=user.following.all())
+        queryset = Diary.objects.filter((Q(created_by__in=user.following.all()) & Q(visibility='FL')) | Q(visibility='PB'))
         return queryset
     
 
