@@ -1,6 +1,36 @@
 from rest_framework import serializers
 from .models import *
 
+class SignUpSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            'email',
+            'password',
+        ]
+
+class SignUpKakaoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            'kakao_id',
+        ]
+
+class EmailLoginSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            'email',
+            'password',
+        ]
+
+class KakaoLoginSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            'kakao_id',
+        ]
+
 class LikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Like
@@ -47,6 +77,7 @@ class TodoConciseSerializer(serializers.ModelSerializer):
             'id',
             'title', 
             'description',
+            'reminder',
             'created_at',
             'date',
             'is_completed',
@@ -89,12 +120,22 @@ class DiarySerializer(serializers.ModelSerializer):
             'comments',
         ]
 
+class ProfileConciseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = [
+            'username'
+        ]
+
 class FollowSerializer(serializers.ModelSerializer):
+    
+    profile = ProfileConciseSerializer(read_only=True)
+
     class Meta:
         model = User
         fields = [
             'id',
-            'username'
+            'profile',
         ]
 
 class FollowRelationSerializer(serializers.ModelSerializer):
@@ -110,6 +151,7 @@ class FollowRelationSerializer(serializers.ModelSerializer):
         ]
 
 class ProfileSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Profile
         fields = '__all__'
