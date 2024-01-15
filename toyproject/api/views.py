@@ -1,6 +1,7 @@
 from rest_framework.generics import CreateAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView, RetrieveAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin
+from rest_framework.authtoken.models import Token
 from .serializers import (  TodoSerializer, 
                             GoalSerializer, 
                             DiarySerializer, 
@@ -50,8 +51,8 @@ class SignUpAPIView(CreateAPIView):
                 return Response({
                     "result_code" : 1,
                     "result" : "FAIL",
-                    "error_msg" : "User already exists",
-                    "token" : "",
+                    "error_msg" : "User with this email already exists",
+                    "token" : Token.objects.get(user=user).key,
                     "user_id" : ""
                 }, status=status.HTTP_200_OK)
             except ObjectDoesNotExist:
@@ -60,13 +61,13 @@ class SignUpAPIView(CreateAPIView):
                     "result_code" : 0,
                     "result" : "SUCCESS",
                     "error_msg" : "",
-                    "token" : "10100010sdfasdfasemail",
+                    "token" : Token.objects.get(user=user).key,
                     "user_id" : user.id
                 }, status=status.HTTP_200_OK)
         return Response({
             "result_code" : 1,
             "result" : "FAIL",
-            "error_msg" : serializer.errors,
+            "error_msg" : serializer.errors[0],
             "token" : "",
             "user_id" : ""
         }, status=status.HTTP_400_BAD_REQUEST)
@@ -83,14 +84,14 @@ class SignUpKakaoAPIView(CreateAPIView):
                 "result_code" : 0,
                 "result" : "SUCCESS",
                 "error_msg" : "",
-                "token" : "10100010sdfasdfaskakao",
+                "token" : Token.objects.get(user=user).key,
                 "kakao_id" : user.kakao_id,
                 "user_id" : user.id
             }, status=status.HTTP_200_OK)
         return Response({
             "result_code" : 1,
             "result" : "FAIL",
-            "error_msg" : serializer.errors,
+            "error_msg" : serializer.errors[0],
             "token" : "",
             "kakao_id" : "",
             "user_id" : ""
@@ -101,7 +102,7 @@ class SignupGuestAPIView(RetrieveAPIView): # need to review...
     def get(self, request, *args, **kwargs):
         user = User.objects.create()
         return Response({
-            "token": "10100010sdfasdfas",
+            "token": Token.objects.get(user=user).key,
             "user_id": user.id
         }, status=status.HTTP_200_OK)
 
@@ -125,12 +126,12 @@ class LoginEmailAPIView(CreateAPIView):
                 "result_code" : 0,
                 "result" : "SUCCESS",
                 "error_msg" : "",
-                "token" : "10100010sdfasdfasemail"
+                "token" : Token.objects.get(user=user).key
             }, status=status.HTTP_200_OK)
         return Response({
             "result_code" : 1,
             "result" : "FAIL",
-            "error_msg" : serializer.errors,
+            "error_msg" : serializer.errors[0],
             "token" : ""
         }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -149,12 +150,11 @@ class LoginKakaoAPIView(CreateAPIView):
                     "error_msg" : "KaKao User needs to sign up",
                     "token" : ""
                 }, status=status.HTTP_200_OK)
-            user = serializer.validated_data
             return Response({
                 "result_code" : 0,
                 "result" : "SUCCESS",
                 "error_msg" : "",
-                "token" : "10100010sdfasdfaskakao"
+                "token" : Token.objects.get(user=user).key
             }, status=status.HTTP_200_OK)
         return Response({
             "result_code" : 1,
