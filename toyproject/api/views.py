@@ -25,6 +25,18 @@ from django.shortcuts import get_object_or_404
 
 from datetime import datetime
 
+from rest_framework.pagination import CursorPagination
+
+class CustomCursorPagination(CursorPagination):
+    ordering = '-id'
+    page_size = 3
+
+    def paginate_queryset(self, queryset, request, view=None):
+        if self.ordering:
+            queryset = queryset.order_by(self.ordering)
+
+        return super().paginate_queryset(queryset, request, view)
+
 class SignUpAPIView(CreateAPIView):
     serializer_class = SignUpSerializer
 
@@ -153,7 +165,8 @@ class GoalListCreateAPIView(ListCreateAPIView):
     serializer_class = GoalSerializer
 
     def perform_create(self, serializer):
-        return serializer.save(created_by=self.request.user)
+        user_id = self.kwargs.get('user_id')
+        return serializer.save(created_by=User.objects.get(id=user_id))
 
     def get_queryset(self):
         user_id = self.kwargs.get('user_id')
@@ -181,7 +194,8 @@ class TodoListCreateAPIView(ListCreateAPIView):
 
     def perform_create(self, serializer):
         goal_id = self.kwargs.get('goal_id')
-        return serializer.save(created_by=self.request.user, goal=Goal.objects.get(id=goal_id))
+        user_id = self.kwargs.get('user_id')
+        return serializer.save(created_by=User.objects.get(id=user_id), goal=Goal.objects.get(id=goal_id))
     
     def get_queryset(self):
         goal_id = self.kwargs.get('goal_id')
@@ -239,5 +253,16 @@ class ProfileDetailAPIView(RetrieveUpdateAPIView):
     queryset = Profile.objects.all()
     lookup_url_kwarg = 'user_id'
     
+class DiaryFeedListAPIView(ListAPIView):
+    serializer_class = DiarySerializer
+    pagination_class = CustomCursorPagination
+    
+    def get_queryset(self):
+        user_id = self.kwargs.get('user_id')
+        user = User.objects.get(id=user_id)
+        queryset = Diary.objects.filter(created_by__in=user.following.all())
+        return queryset
+    
 
+    
 
