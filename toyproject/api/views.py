@@ -1,6 +1,7 @@
 from rest_framework.generics import CreateAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView, RetrieveAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin
+from rest_framework.authtoken.models import Token
 from .serializers import (  TodoSerializer, 
                             GoalSerializer, 
                             DiarySerializer, 
@@ -45,31 +46,22 @@ class SignUpAPIView(CreateAPIView):
     def post(self, request, *args, **kwargs):
         serializer = SignUpSerializer(data=request.data)
         if serializer.is_valid():
-            try:
-                user = User.objects.get(email=serializer.validated_data['email'])
-                return Response({
-                    "result_code" : 1,
-                    "result" : "FAIL",
-                    "error_msg" : "User already exists",
-                    "token" : "",
-                    "user_id" : ""
-                }, status=status.HTTP_200_OK)
-            except ObjectDoesNotExist:
-                user = serializer.save()
-                return Response({
-                    "result_code" : 0,
-                    "result" : "SUCCESS",
-                    "error_msg" : "",
-                    "token" : "10100010sdfasdfasemail",
-                    "user_id" : user.id
-                }, status=status.HTTP_200_OK)
+            user = serializer.save()
+            return Response({
+                "result_code" : 0,
+                "result" : "SUCCESS",
+                "error_msg" : "",
+                "token" : Token.objects.get(user=user).key,
+                "user_id" : user.id
+            }, status=status.HTTP_200_OK)
         return Response({
             "result_code" : 1,
             "result" : "FAIL",
-            "error_msg" : serializer.errors,
+            "error_msg" : serializer.errors.get('email')[0],
             "token" : "",
             "user_id" : ""
         }, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class SignUpKakaoAPIView(CreateAPIView):
@@ -82,18 +74,14 @@ class SignUpKakaoAPIView(CreateAPIView):
             return Response({
                 "result_code" : 0,
                 "result" : "SUCCESS",
-                "error_msg" : "",
-                "token" : "10100010sdfasdfaskakao",
+                "token" : Token.objects.get(user=user).key,
                 "kakao_id" : user.kakao_id,
                 "user_id" : user.id
             }, status=status.HTTP_200_OK)
         return Response({
             "result_code" : 1,
             "result" : "FAIL",
-            "error_msg" : serializer.errors,
-            "token" : "",
-            "kakao_id" : "",
-            "user_id" : ""
+            "error_msg" : serializer.errors.get('kakao_id')[0],
         }, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -101,7 +89,7 @@ class SignupGuestAPIView(RetrieveAPIView): # need to review...
     def get(self, request, *args, **kwargs):
         user = User.objects.create()
         return Response({
-            "token": "10100010sdfasdfas",
+            "token": Token.objects.get(user=user).key,
             "user_id": user.id
         }, status=status.HTTP_200_OK)
 
@@ -109,59 +97,53 @@ class LoginEmailAPIView(CreateAPIView):
     serializer_class = EmailLoginSerializer
 
     def post(self, request, *args, **kwargs):
-        serializer = EmailLoginSerializer(data=request.data)
-
-        if serializer.is_valid():
-            try:
-                user = User.objects.get(email=serializer.validated_data['email'])
-            except ObjectDoesNotExist:
+        try: 
+            user = User.objects.get(email=request.data['email'])
+            if user.password == request.data['password']:
+                return Response({
+                    "result_code" : 0,
+                    "result" : "SUCCESS",
+                    "token" : Token.objects.get(user=user).key
+                }, status=status.HTTP_200_OK)
+            else:
                 return Response({
                     "result_code" : 1,
                     "result" : "FAIL",
-                    "error_msg" : "User does not exist",
-                    "token" : ""
-                }, status=status.HTTP_400_BAD_REQUEST)
+                    "error_msg" : "Wrong password",
+                    "password" : user.password,
+                }, status=status.HTTP_200_OK)
+        except ObjectDoesNotExist:
             return Response({
-                "result_code" : 0,
-                "result" : "SUCCESS",
-                "error_msg" : "",
-                "token" : "10100010sdfasdfasemail"
-            }, status=status.HTTP_200_OK)
-        return Response({
-            "result_code" : 1,
-            "result" : "FAIL",
-            "error_msg" : serializer.errors,
-            "token" : ""
-        }, status=status.HTTP_400_BAD_REQUEST)
+                    "result_code" : 1,
+                    "result" : "FAIL",
+                    "error_msg" : "User with this email does not exist",
+                }, status=status.HTTP_200_OK)
 
 class LoginKakaoAPIView(CreateAPIView):
     serializer_class = KakaoLoginSerializer
 
     def post(self, request, *args, **kwargs):
-        serializer = KakaoLoginSerializer(data=request.data)
-        if serializer.is_valid():
-            try: 
-                user = User.objects.get(kakao_id=serializer.validated_data['kakao_id'])
-            except ObjectDoesNotExist:
+        try: 
+            user = User.objects.get(kakao_id=request.data['kakao_id'])
+            if user.password == request.data['password']:
                 return Response({
-                    "result_code" : 2,
-                    "result" : "FAIL",
-                    "error_msg" : "KaKao User needs to sign up",
-                    "token" : ""
+                    "result_code" : 0,
+                    "result" : "SUCCESS",
+                    "token" : Token.objects.get(user=user).key
                 }, status=status.HTTP_200_OK)
-            user = serializer.validated_data
+            else:
+                return Response({
+                    "result_code" : 1,
+                    "result" : "FAIL",
+                    "error_msg" : "Wrong password",
+                    "password" : user.password,
+                }, status=status.HTTP_200_OK)
+        except ObjectDoesNotExist:
             return Response({
-                "result_code" : 0,
-                "result" : "SUCCESS",
-                "error_msg" : "",
-                "token" : "10100010sdfasdfaskakao"
-            }, status=status.HTTP_200_OK)
-        return Response({
-            "result_code" : 1,
-            "result" : "FAIL",
-            "error_msg" : serializer.errors,
-            "token" : ""
-        }, status=status.HTTP_400_BAD_REQUEST)
+                "result_code" : 2,
+                    "result" : "FAIL",
+                    "error_msg" : "User with this kakao_id does not exist",
+                }, status=status.HTTP_200_OK)
 
 class GoalListCreateAPIView(ListCreateAPIView):
     serializer_class = GoalSerializer
