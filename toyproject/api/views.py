@@ -45,21 +45,22 @@ class SignUpAPIView(CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         serializer = SignUpSerializer(data=request.data)
+        
         if serializer.is_valid():
+            # if null then return error
+            if request.data['email'] == "":
+                return Response({
+                    "error_msg" : "Email cannot be empty"
+                }, status=status.HTTP_200_OK)
             user = serializer.save()
             return Response({
-                "result_code" : 0,
                 "result" : "SUCCESS",
-                "error_msg" : "",
-                "token" : Token.objects.get(user=user).key,
-                "user_id" : user.id
+                "email" : user.email,
+                "user_id" : user.id,
+                "token" : Token.objects.get(user=user).key
             }, status=status.HTTP_200_OK)
         return Response({
-            "result_code" : 1,
-            "result" : "FAIL",
-            "error_msg" : serializer.errors.get('email')[0],
-            "token" : "",
-            "user_id" : ""
+            "error_msg" : serializer.errors.get('email')[0]
         }, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -70,17 +71,17 @@ class SignUpKakaoAPIView(CreateAPIView):
     def post(self, request, *args, **kwargs):
         serializer = SignUpKakaoSerializer(data=request.data)
         if serializer.is_valid():
+            if request.data['kakao_id'] == '':
+                return Response({
+                    "error_msg" : "Kakao ID cannot be empty"
+                }, status=status.HTTP_400_BAD_REQUEST)
             user = serializer.save()
             return Response({
-                "result_code" : 0,
-                "result" : "SUCCESS",
                 "token" : Token.objects.get(user=user).key,
                 "kakao_id" : user.kakao_id,
                 "user_id" : user.id
             }, status=status.HTTP_200_OK)
         return Response({
-            "result_code" : 1,
-            "result" : "FAIL",
             "error_msg" : serializer.errors.get('kakao_id')[0],
         }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -101,16 +102,12 @@ class LoginEmailAPIView(CreateAPIView):
             user = User.objects.get(email=request.data['email'])
             if user.password == request.data['password']:
                 return Response({
-                    "result_code" : 0,
-                    "result" : "SUCCESS",
+                    "user_id" : user.id,
                     "token" : Token.objects.get(user=user).key
                 }, status=status.HTTP_200_OK)
             else:
                 return Response({
-                    "result_code" : 1,
-                    "result" : "FAIL",
                     "error_msg" : "Wrong password",
-                    "password" : user.password,
                 }, status=status.HTTP_200_OK)
         except ObjectDoesNotExist:
             return Response({
@@ -125,25 +122,14 @@ class LoginKakaoAPIView(CreateAPIView):
     def post(self, request, *args, **kwargs):
         try: 
             user = User.objects.get(kakao_id=request.data['kakao_id'])
-            if user.password == request.data['password']:
-                return Response({
-                    "result_code" : 0,
-                    "result" : "SUCCESS",
-                    "token" : Token.objects.get(user=user).key
-                }, status=status.HTTP_200_OK)
-            else:
-                return Response({
-                    "result_code" : 1,
-                    "result" : "FAIL",
-                    "error_msg" : "Wrong password",
-                    "password" : user.password,
-                }, status=status.HTTP_200_OK)
+            return Response({
+                "token" : Token.objects.get(user=user).key,
+                "kakao_id" : user.kakao_id,
+                "user_id" : user.id
+            }, status=status.HTTP_200_OK)
         except ObjectDoesNotExist:
             return Response({
-                "result_code" : 2,
-                    "result" : "FAIL",
-                    "error_msg" : "User with this kakao_id does not exist",
-                }, status=status.HTTP_200_OK)
+                }, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
 class GoalListCreateAPIView(ListCreateAPIView):
     serializer_class = GoalSerializer
