@@ -80,10 +80,10 @@ class Like(models.Model):
 
 class Todo(models.Model):
     title = models.CharField(max_length=32)
-    description = models.TextField()
+    description = models.TextField(blank=True)
     reminder = models.DateTimeField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    date = models.DateField(default=date.today)
+    date = models.DateField(default='')
     is_completed = models.BooleanField(default=False)
     goal = models.ForeignKey(Goal, related_name='todos', on_delete=models.CASCADE)
     created_by = models.ForeignKey(User, related_name='todos', on_delete=models.CASCADE)
