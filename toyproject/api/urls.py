@@ -25,4 +25,11 @@ urlpatterns = [
     path('<int:user_id>/diarys', views.DiaryListAPIView.as_view()),
     path('<int:user_id>/diarys/<str:date>', views.DiaryDetailAPIView.as_view()),
     path('<int:user_id>/diaryfeed', views.DiaryFeedListAPIView.as_view()),
+
+    # like API views
+    path('<int:user_id>/diarys/<str:date>/like', views.DiaryLikeAPIView.as_view()),
+    path('<int:user_id>/goals/<int:goal_id>/todos/<int:todo_id>/like', views.TodoLikeAPIView.as_view()),
+
+    # comment API views
+    path('<int:user_id>/diarys/<str:date>/comment', views.DiaryCommentAPIView.as_view()),
 ]

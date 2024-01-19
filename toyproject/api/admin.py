@@ -5,8 +5,12 @@ from .models import User, Goal, Diary, Like, Todo, Comment, Profile
 class LikeInline(GenericTabularInline):
     model = Like
 
-class CommentInline(admin.StackedInline):
+class CommentInline(GenericTabularInline):
     model = Comment
+    ct_field = 'content_type'
+    id_field = 'object_id'
+    extra = 1
+
 
 class TodoInline(admin.StackedInline):
     model = Todo

@@ -12,6 +12,8 @@ from .serializers import (  TodoSerializer,
                             SignUpSerializer,
                             EmailLoginSerializer,
                             KakaoLoginSerializer,
+                            LikeSerializer,
+                            CommentSerializer,
                         )
 from .models import Goal, Todo, Diary, User, Profile
 
@@ -232,7 +234,31 @@ class DiaryFeedListAPIView(ListAPIView):
         user = User.objects.get(id=user_id)
         queryset = Diary.objects.filter((Q(created_by__in=user.following.all()) & Q(visibility='FL')) | Q(visibility='PB'))
         return queryset
-    
 
+class DiaryLikeAPIView(CreateAPIView):
+    serializer_class = LikeSerializer
+    
+    def perform_create(self, serializer):
+        user_id = self.kwargs.get('user_id')
+        date = self.kwargs.get('date')
+        diary = Diary.objects.get(created_by_id=user_id, date=date)
+        return serializer.save(liked_object=diary)
+
+class TodoLikeAPIView(CreateAPIView):
+    serializer_class = LikeSerializer
+    
+    def perform_create(self, serializer):
+        todo_id = self.kwargs.get('todo_id')
+        todo = Todo.objects.get(id=todo_id)
+        return serializer.save(liked_object=todo)
+    
+class DiaryCommentAPIView(CreateAPIView):
+    serializer_class = CommentSerializer
+    
+    def perform_create(self, serializer):
+        user_id = self.kwargs.get('user_id')
+        date = self.kwargs.get('date')
+        diary = Diary.objects.get(created_by_id=user_id, date=date)
+        return serializer.save(commented_object=diary)
     
 

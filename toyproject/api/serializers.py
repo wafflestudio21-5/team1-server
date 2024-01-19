@@ -32,10 +32,12 @@ class KakaoLoginSerializer(serializers.ModelSerializer):
         ]
 
 class LikeSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = Like
         fields = [
-            'user'
+            'user',
+            'emoji'
         ]
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -45,7 +47,7 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = [
-            'created_at',
+            'created_at_iso',
             'user',
             'description',
             'likes',
@@ -61,8 +63,8 @@ class TodoSerializer(serializers.ModelSerializer):
             'id',
             'title', 
             'description',
-            'reminder',
-            'created_at',
+            'reminder_iso',
+            'created_at_iso',
             'date',
             'is_completed',
             'goal',
@@ -77,8 +79,8 @@ class TodoConciseSerializer(serializers.ModelSerializer):
             'id',
             'title', 
             'description',
-            'reminder',
-            'created_at',
+            'reminder_iso',
+            'created_at_iso',
             'date',
             'is_completed',
             'likes',
@@ -95,7 +97,7 @@ class GoalSerializer(serializers.ModelSerializer):
             'title', 
             'visibility',
             'color',
-            'created_at',
+            'created_at_iso',
             'todos',
         ]
 

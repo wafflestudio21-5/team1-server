@@ -24,6 +24,10 @@ class User(AbstractUser):
     def __str__(self):
         return str(self.id)
     
+    @property
+    def created_at_iso(self):
+        return self.created_at.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+    
 class Profile(models.Model):
     user = models.OneToOneField(
         User, 
@@ -67,6 +71,10 @@ class Goal(models.Model):
 
     def __str__(self):
         return f'{self.title} by {self.created_by}'
+    
+    @property
+    def created_at_iso(self):
+        return self.created_at.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
 
 class Like(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -75,8 +83,28 @@ class Like(models.Model):
     object_id = models.PositiveIntegerField()
     liked_object = GenericForeignKey('content_type', 'object_id')
 
+    emoji = models.IntegerField(
+        validators=[MaxValueValidator(10), MinValueValidator(1)]
+    )
+
     def __str__(self):
         return f"like by {self.user} on {self.liked_object}"
+
+class Comment(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    description = models.TextField()
+    user = models.ForeignKey(User, related_name='comments', on_delete=models.CASCADE)
+    content_type = models.ForeignKey(ContentType, related_name='comments', on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    commented_object = GenericForeignKey('content_type', 'object_id')
+    likes = GenericRelation(Like)
+
+    def __str__(self):
+        return f"comment by {self.user} on {self.commented_object}"
+    
+    @property
+    def created_at_iso(self):
+        return self.created_at.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
 
 class Todo(models.Model):
     title = models.CharField(max_length=32)
@@ -91,6 +119,14 @@ class Todo(models.Model):
 
     def __str__(self):
         return self.title
+    
+    @property
+    def created_at_iso(self):
+        return self.created_at.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+    
+    @property
+    def reminder_iso(self):
+        return self.reminder.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
     
 class Diary(models.Model):
     description = models.TextField()
@@ -121,17 +157,9 @@ class Diary(models.Model):
     created_by = models.ForeignKey(User, related_name='diarys', on_delete=models.CASCADE)
     date = models.DateField(default=date.today)
     likes = GenericRelation(Like)
+    comments = GenericRelation(Comment)
 
     def __str__(self):
         return f"{self.date} diary by {self.created_by}"
 
 
-class Comment(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True)
-    description = models.TextField()
-    user = models.ForeignKey(User, related_name='comments', on_delete=models.CASCADE)
-    diary = models.ForeignKey(Diary, related_name='comments', on_delete=models.CASCADE)
-    likes = GenericRelation(Like)
-
-    def __str__(self):
-        return f"comment by {self.user} on {self.diary}"
