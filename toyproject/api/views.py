@@ -234,6 +234,16 @@ class DiaryFeedListAPIView(ListAPIView):
         user = User.objects.get(id=user_id)
         queryset = Diary.objects.filter((Q(created_by__in=user.following.all()) & Q(visibility='FL')) | Q(visibility='PB'))
         return queryset
+    
+class TodoFeedListAPIView(ListAPIView):
+    serializer_class = TodoSerializer
+    pagination_class = CustomCursorPagination
+    
+    def get_queryset(self):
+        user_id = self.kwargs.get('user_id')
+        user = User.objects.get(id=user_id)
+        queryset = Todo.objects.filter((Q(created_by__in=user.following.all()) & Q(goal__visibility='FL')) | Q(goal__visibility='PB'))
+        return queryset
 
 class DiaryLikeAPIView(CreateAPIView):
     serializer_class = LikeSerializer

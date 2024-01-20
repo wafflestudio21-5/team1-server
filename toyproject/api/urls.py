@@ -24,7 +24,10 @@ urlpatterns = [
     path('diary-create', views.DiaryCreateAPIView.as_view()),
     path('<int:user_id>/diarys', views.DiaryListAPIView.as_view()),
     path('<int:user_id>/diarys/<str:date>', views.DiaryDetailAPIView.as_view()),
+
+    # feedlist API views
     path('<int:user_id>/diaryfeed', views.DiaryFeedListAPIView.as_view()),
+    path('<int:user_id>/todofeed', views.TodoFeedListAPIView.as_view()),
 
     # like API views
     path('<int:user_id>/diarys/<str:date>/like', views.DiaryLikeAPIView.as_view()),

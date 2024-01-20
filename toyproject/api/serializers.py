@@ -62,6 +62,7 @@ class TodoSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'title', 
+            'created_by',
             'description',
             'reminder_iso',
             'created_at_iso',
