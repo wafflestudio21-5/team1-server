@@ -42,6 +42,16 @@ class CustomCursorPagination(CursorPagination):
 
         return super().paginate_queryset(queryset, request, view)
 
+class UserSearchPagination(CursorPagination):
+    ordering = '-user_id'
+    page_size = 3
+
+    def paginate_queryset(self, queryset, request, view=None):
+        if self.ordering:
+            queryset = queryset.order_by(self.ordering)
+
+        return super().paginate_queryset(queryset, request, view)
+
 class SignUpAPIView(CreateAPIView):
     serializer_class = SignUpSerializer
 
@@ -271,4 +281,11 @@ class DiaryCommentAPIView(CreateAPIView):
         diary = Diary.objects.get(created_by_id=user_id, date=date)
         return serializer.save(commented_object=diary)
     
+class UserSearchAPIView(ListAPIView):
+    serializer_class = ProfileSerializer
+    pagination_class = UserSearchPagination
 
+    def get_queryset(self):
+        username = self.request.query_params.get('username')
+        queryset = Profile.objects.filter(username__icontains=username)
+        return queryset

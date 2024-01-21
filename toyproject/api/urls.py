@@ -14,6 +14,9 @@ urlpatterns = [
     path('<int:user_id>', views.ProfileDetailAPIView.as_view()),
     path('<int:user_id>/follows', views.FollowRelationAPIView.as_view()),
 
+    # profile search API view
+    path('user-search', views.UserSearchAPIView.as_view()),
+
     # goal, todo API views
     path('<int:user_id>/goals', views.GoalListCreateAPIView.as_view()),
     path('<int:user_id>/goals/<int:goal_id>', views.GoalDetailAPIView.as_view()), 
@@ -35,4 +38,5 @@ urlpatterns = [
 
     # comment API views
     path('<int:user_id>/diarys/<str:date>/comment', views.DiaryCommentAPIView.as_view()),
+
 ]
