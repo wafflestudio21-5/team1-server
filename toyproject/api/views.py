@@ -289,3 +289,7 @@ class UserSearchAPIView(ListAPIView):
         username = self.request.query_params.get('username')
         queryset = Profile.objects.filter(username__icontains=username)
         return queryset
+    
+class UserAllAPIView(ListAPIView):
+    serializer_class = ProfileSerializer
+    queryset = Profile.objects.all()

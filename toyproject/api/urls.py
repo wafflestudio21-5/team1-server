@@ -17,6 +17,9 @@ urlpatterns = [
     # profile search API view
     path('user-search', views.UserSearchAPIView.as_view()),
 
+    # all user profiles
+    path('user-all', views.UserAllAPIView.as_view()),
+
     # goal, todo API views
     path('<int:user_id>/goals', views.GoalListCreateAPIView.as_view()),
     path('<int:user_id>/goals/<int:goal_id>', views.GoalDetailAPIView.as_view()), 
