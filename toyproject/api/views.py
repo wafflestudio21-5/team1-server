@@ -42,7 +42,7 @@ class CustomCursorPagination(CursorPagination):
 
         return super().paginate_queryset(queryset, request, view)
 
-class UserSearchPagination(CursorPagination):
+class ProfileCursorPagination(CursorPagination):
     ordering = '-user_id'
     page_size = 3
 
@@ -283,7 +283,7 @@ class DiaryCommentAPIView(CreateAPIView):
     
 class UserSearchAPIView(ListAPIView):
     serializer_class = ProfileSerializer
-    pagination_class = UserSearchPagination
+    pagination_class = ProfileCursorPagination
 
     def get_queryset(self):
         username = self.request.query_params.get('username')
@@ -292,4 +292,5 @@ class UserSearchAPIView(ListAPIView):
     
 class UserAllAPIView(ListAPIView):
     serializer_class = ProfileSerializer
+    pagination_class = ProfileCursorPagination
     queryset = Profile.objects.all()
