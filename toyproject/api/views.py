@@ -15,7 +15,7 @@ from .serializers import (  TodoSerializer,
                             LikeSerializer,
                             CommentSerializer,
                         )
-from .models import Goal, Todo, Diary, User, Profile
+from .models import Goal, Todo, Diary, User, Profile, Comment
 
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -314,3 +314,8 @@ class UserAllAPIView(ListAPIView):
     serializer_class = ProfileSerializer
     pagination_class = UserAllCursorPagination
     queryset = Profile.objects.all()
+
+class CommentDetailAPIView(RetrieveUpdateDestroyAPIView):
+    serializer_class = CommentSerializer
+    queryset = Comment.objects.all()
+    lookup_url_kwarg = 'comment_id'

@@ -41,5 +41,6 @@ urlpatterns = [
 
     # comment API views
     path('<int:user_id>/diarys/<str:date>/comment', views.DiaryCommentAPIView.as_view()),
+    path('comment-detail/<int:comment_id>', views.CommentDetailAPIView.as_view()),
 
 ]
