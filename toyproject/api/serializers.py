@@ -196,5 +196,5 @@ class ProfileTodoSearchSerializer(serializers.ModelSerializer):
 
     def get_todos(self, obj):
         keyword = self.context.get('title', '')
-        todos = obj.user.todos.filter(Q(goal__visibility='PB') & Q(title__icontains=keyword)).order_by('created_at')[:5]
+        todos = obj.user.todos.filter(Q(goal__visibility='PB') & Q(title__icontains=keyword)).order_by('created_at')
         return TodoConciseSerializer(todos, many=True).data    

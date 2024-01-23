@@ -291,6 +291,7 @@ class TodoFeedListAPIView(ListAPIView):
 
 class TodoSearchAPIView(ListAPIView):
     serializer_class = ProfileTodoSearchSerializer
+    pagination_class = TodoFeedCursorPagination
     
     def get_queryset(self):
         subquery = Todo.objects.filter(
