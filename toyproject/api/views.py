@@ -2,7 +2,8 @@ from rest_framework.generics import CreateAPIView, ListCreateAPIView, RetrieveUp
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin
 from rest_framework.authtoken.models import Token
-from .serializers import (  TodoSerializer, 
+from .serializers import (  TodoSerializer,
+                            ProfileTodoSerializer, 
                             GoalSerializer, 
                             DiarySerializer, 
                             FollowRelationSerializer, 
@@ -41,10 +42,20 @@ class CustomCursorPagination(CursorPagination):
             queryset = queryset.order_by(self.ordering)
 
         return super().paginate_queryset(queryset, request, view)
+    
+class TodoFeedCursorPagination(CursorPagination):
+    ordering = '-user_id'
+    page_size = 10
+
+    def paginate_queryset(self, queryset, request, view=None):
+        if self.ordering:
+            queryset = queryset.order_by(self.ordering)
+
+        return super().paginate_queryset(queryset, request, view)
 
 class SearchCursorPagination(CursorPagination):
     ordering = '-user_id'
-    page_size = 3
+    page_size = 20
 
     def paginate_queryset(self, queryset, request, view=None):
         if self.ordering:
@@ -64,7 +75,7 @@ class DiaryCursorPagination(CursorPagination):
 
 class UserAllCursorPagination(CursorPagination):
     ordering = '-user_id'
-    page_size = 10
+    page_size = 20
 
     def paginate_queryset(self, queryset, request, view=None):
         if self.ordering:
@@ -266,14 +277,26 @@ class DiaryFeedListAPIView(ListAPIView):
         return queryset
     
 class TodoFeedListAPIView(ListAPIView):
-    serializer_class = TodoSerializer
-    pagination_class = CustomCursorPagination
+    serializer_class = ProfileTodoSerializer
+    pagination_class = TodoFeedCursorPagination
     
     def get_queryset(self):
-        user_id = self.kwargs.get('user_id')
-        user = User.objects.get(id=user_id)
-        queryset = Todo.objects.filter((Q(created_by__in=user.following.all()) & Q(goal__visibility='FL')) | Q(goal__visibility='PB'))
+        queryset = Profile.objects.filter(Q(user__todos__is_completed=True)).distinct()
         return queryset
+    
+class TodoSearchAPIView(ListAPIView): # not working yet :(
+    serializer_class = ProfileTodoSerializer
+    pagination_class = TodoFeedCursorPagination
+    
+    def get_queryset(self):
+        keyword = self.request.query_params.get('title')
+        queryset = Profile.objects.filter(Q(user__todos__is_completed=True)).distinct()
+
+        if keyword is not None:
+            queryset.filter(user__todos__title__icontains=keyword)
+
+        return queryset
+
 
 class DiaryLikeAPIView(CreateAPIView):
     serializer_class = LikeSerializer

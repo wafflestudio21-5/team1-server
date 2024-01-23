@@ -17,6 +17,9 @@ urlpatterns = [
     # profile search API view
     path('user-search', views.UserSearchAPIView.as_view()),
 
+    # todo search API view (not working yet)
+    path('todo-search', views.TodoSearchAPIView.as_view()),
+
     # all user profiles
     path('user-all', views.UserAllAPIView.as_view()),
 
@@ -33,7 +36,7 @@ urlpatterns = [
 
     # feedlist API views
     path('<int:user_id>/diaryfeed', views.DiaryFeedListAPIView.as_view()),
-    path('<int:user_id>/todofeed', views.TodoFeedListAPIView.as_view()),
+    path('todofeed', views.TodoFeedListAPIView.as_view()),
 
     # like API views
     path('<int:user_id>/diarys/<str:date>/like', views.DiaryLikeAPIView.as_view()),

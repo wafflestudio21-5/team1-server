@@ -75,11 +75,13 @@ class TodoSerializer(serializers.ModelSerializer):
 
 class TodoConciseSerializer(serializers.ModelSerializer):
     likes = LikeSerializer(many=True, read_only=True)
+    color = serializers.SerializerMethodField()
     class Meta:
         model = Todo
         fields = [
             'id',
             'title', 
+            'color',
             'description',
             'reminder_iso',
             'created_at_iso',
@@ -87,6 +89,10 @@ class TodoConciseSerializer(serializers.ModelSerializer):
             'is_completed',
             'likes',
         ]
+
+    def get_color(self, obj):
+        color = obj.goal.color
+        return color
 
 class GoalSerializer(serializers.ModelSerializer):
 
@@ -166,3 +172,28 @@ class ProfileSerializer(serializers.ModelSerializer):
         representation['following_count'] = instance.user.following.count()
 
         return representation
+    
+class ProfileTodoSerializer(serializers.ModelSerializer):
+
+    todos = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Profile
+        fields = ['username', 'intro', 'profile_pic', 'todos']
+
+    def get_todos(self, obj):
+        todos = obj.user.todos.filter(is_completed=True).order_by('created_at')[:5]
+        return TodoConciseSerializer(todos, many=True).data
+
+class ProfileTodoSearchSerializer(serializers.ModelSerializer):
+
+    todos = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Profile
+        fields = ['username', 'intro', 'profile_pic', 'todos']
+
+    def get_todos(self, obj):
+        keyword = self.context.get('title', None)
+        todos = obj.user.todos.filter(is_completed=True, title__icontains=keyword).order_by('created_at')[:5]
+        return TodoConciseSerializer(todos, many=True).data    
