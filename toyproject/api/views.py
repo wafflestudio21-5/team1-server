@@ -15,6 +15,7 @@ from .serializers import (  TodoSerializer,
                             KakaoLoginSerializer,
                             LikeSerializer,
                             CommentSerializer,
+                            ProfileTodoSearchSerializer,
                         )
 from .models import Goal, Todo, Diary, User, Profile, Comment
 
@@ -27,7 +28,7 @@ from django.http import Http404
 
 from django.shortcuts import get_object_or_404
 
-from django.db.models import Q
+from django.db.models import Q, OuterRef, Subquery, Count
 
 from datetime import datetime
 
@@ -281,22 +282,33 @@ class TodoFeedListAPIView(ListAPIView):
     pagination_class = TodoFeedCursorPagination
     
     def get_queryset(self):
-        queryset = Profile.objects.filter(Q(user__todos__is_completed=True)).distinct()
+        queryset = Profile.objects.filter(
+            Q(user__todos__is_completed=True) &
+            Q(user__todos__goal__visibility='PB')
+        ).distinct()
+
         return queryset
-    
-class TodoSearchAPIView(ListAPIView): # not working yet :(
-    serializer_class = ProfileTodoSerializer
-    pagination_class = TodoFeedCursorPagination
+
+class TodoSearchAPIView(ListAPIView):
+    serializer_class = ProfileTodoSearchSerializer
     
     def get_queryset(self):
-        keyword = self.request.query_params.get('title')
-        queryset = Profile.objects.filter(Q(user__todos__is_completed=True)).distinct()
+        subquery = Todo.objects.filter(
+            created_by=OuterRef('user'),
+            goal__visibility='PB',
+            title__icontains=self.request.query_params.get('title', '')
+        ).values('created_by').order_by().annotate(count=Count('id')).values('count')[:1]
 
-        if keyword is not None:
-            queryset.filter(user__todos__title__icontains=keyword)
+        queryset = Profile.objects.annotate(
+            num_matching_todos=Subquery(subquery)
+        ).filter(num_matching_todos__gt=0).distinct()
 
         return queryset
-
+    
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['title'] = self.request.query_params.get('title', '')
+        return context
 
 class DiaryLikeAPIView(CreateAPIView):
     serializer_class = LikeSerializer

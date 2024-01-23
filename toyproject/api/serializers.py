@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import *
+from django.db.models import Q
 
 class SignUpSerializer(serializers.ModelSerializer):
     class Meta:
@@ -182,7 +183,7 @@ class ProfileTodoSerializer(serializers.ModelSerializer):
         fields = ['username', 'intro', 'profile_pic', 'todos']
 
     def get_todos(self, obj):
-        todos = obj.user.todos.filter(is_completed=True).order_by('created_at')[:5]
+        todos = obj.user.todos.filter(Q(is_completed=True) & Q(goal__visibility='PB')).order_by('created_at')[:5]
         return TodoConciseSerializer(todos, many=True).data
 
 class ProfileTodoSearchSerializer(serializers.ModelSerializer):
@@ -194,6 +195,6 @@ class ProfileTodoSearchSerializer(serializers.ModelSerializer):
         fields = ['username', 'intro', 'profile_pic', 'todos']
 
     def get_todos(self, obj):
-        keyword = self.context.get('title', None)
-        todos = obj.user.todos.filter(is_completed=True, title__icontains=keyword).order_by('created_at')[:5]
+        keyword = self.context.get('title', '')
+        todos = obj.user.todos.filter(Q(goal__visibility='PB') & Q(title__icontains=keyword)).order_by('created_at')[:5]
         return TodoConciseSerializer(todos, many=True).data    
