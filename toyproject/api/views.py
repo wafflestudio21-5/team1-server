@@ -215,8 +215,10 @@ class UpdateLoginProfileAPIView(RetrieveUpdateAPIView):
         user_id = self.kwargs.get('user_id')
         user = User.objects.get(id=user_id)
         if user.password == request.data['password']:
-            user.email = request.data['email']
-            user.kakao_id = request.data['kakao_id']
+            if request.data['email'] != "":
+                user.email = request.data['email']
+            if request.data['kakao_id'] != "":
+                user.kakao_id = request.data['kakao_id']
             user.save()
             return Response({
                 "result" : "SUCCESS",
