@@ -16,7 +16,7 @@ inflection==0.5.1
 jmespath==1.0.1
 jsonschema==4.20.0
 jsonschema-specifications==2023.12.1
-mysqlclient==2.2.1
+mysqlclient==2.1.1
 pathspec==0.10.1
 Pillow==10.1.0
 python-dateutil==2.8.2
