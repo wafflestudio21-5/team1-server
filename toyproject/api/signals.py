@@ -8,6 +8,9 @@ from .models import Profile, User
 def create_profile(sender, instance, created, **kwargs):
     if created:
         Token.objects.create(user=instance)
+        Goal.objects.create(created_by=instance, title='목표 1')
+        Goal.objects.create(created_by=instance, title='목표 2')
+        Goal.objects.create(created_by=instance, title='목표 3')
         if instance.email:
             Profile.objects.create(user=instance, username=instance.email)
         elif instance.kakao_id:
