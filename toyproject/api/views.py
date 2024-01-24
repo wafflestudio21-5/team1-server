@@ -1,4 +1,4 @@
-from rest_framework.generics import CreateAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView, RetrieveAPIView, RetrieveUpdateAPIView
+from rest_framework.generics import UpdateAPIView, CreateAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView, RetrieveAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin
 from rest_framework.authtoken.models import Token
