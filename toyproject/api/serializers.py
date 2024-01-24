@@ -31,6 +31,34 @@ class KakaoLoginSerializer(serializers.ModelSerializer):
             'kakao_id',
         ]
 
+class PasswordChangeSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+
+
+class ChangeGuestToEmailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            'password',
+            'email',
+        ]
+
+class ChangeGuestToKakaoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            'password',
+            'kakao_id',
+        ]
+
+class DeleteUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            'password',
+        ]
+
 class LikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Like
