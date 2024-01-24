@@ -10,6 +10,11 @@ urlpatterns = [
     path('login/email', views.LoginEmailAPIView.as_view()),
     path('login/kakao', views.LoginKakaoAPIView.as_view()),
 
+    # change profile api views
+    path('<int:user_id>/update/password', views.ChangePasswordAPIView.as_view()),
+    path('<int:user_id>/update/', views.UpdateLoginProfileAPIView.as_view()),
+    path('<int:user_id>/delete', views.DeleteUserAPIView.as_view()),
+
     # profile / following_followers
     path('<int:user_id>', views.ProfileDetailAPIView.as_view()),
     path('<int:user_id>/follows', views.FollowRelationAPIView.as_view()),
