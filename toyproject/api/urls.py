@@ -14,6 +14,15 @@ urlpatterns = [
     path('<int:user_id>', views.ProfileDetailAPIView.as_view()),
     path('<int:user_id>/follows', views.FollowRelationAPIView.as_view()),
 
+    # profile search API view
+    path('user-search', views.UserSearchAPIView.as_view()),
+
+    # todo search API view (not working yet)
+    path('todo-search', views.TodoSearchAPIView.as_view()),
+
+    # all user profiles
+    path('user-all', views.UserAllAPIView.as_view()),
+
     # goal, todo API views
     path('<int:user_id>/goals', views.GoalListCreateAPIView.as_view()),
     path('<int:user_id>/goals/<int:goal_id>', views.GoalDetailAPIView.as_view()), 
@@ -24,5 +33,17 @@ urlpatterns = [
     path('diary-create', views.DiaryCreateAPIView.as_view()),
     path('<int:user_id>/diarys', views.DiaryListAPIView.as_view()),
     path('<int:user_id>/diarys/<str:date>', views.DiaryDetailAPIView.as_view()),
+
+    # feedlist API views
     path('<int:user_id>/diaryfeed', views.DiaryFeedListAPIView.as_view()),
+    path('todofeed', views.TodoFeedListAPIView.as_view()),
+
+    # like API views
+    path('<int:user_id>/diarys/<str:date>/like', views.DiaryLikeAPIView.as_view()),
+    path('<int:user_id>/goals/<int:goal_id>/todos/<int:todo_id>/like', views.TodoLikeAPIView.as_view()),
+
+    # comment API views
+    path('<int:user_id>/diarys/<str:date>/comment', views.DiaryCommentAPIView.as_view()),
+    path('comment-detail/<int:comment_id>', views.CommentDetailAPIView.as_view()),
+
 ]

@@ -2,7 +2,8 @@ from rest_framework.generics import CreateAPIView, ListCreateAPIView, RetrieveUp
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin
 from rest_framework.authtoken.models import Token
-from .serializers import (  TodoSerializer, 
+from .serializers import (  TodoSerializer,
+                            ProfileTodoSerializer, 
                             GoalSerializer, 
                             DiarySerializer, 
                             FollowRelationSerializer, 
@@ -12,8 +13,11 @@ from .serializers import (  TodoSerializer,
                             SignUpSerializer,
                             EmailLoginSerializer,
                             KakaoLoginSerializer,
+                            LikeSerializer,
+                            CommentSerializer,
+                            ProfileTodoSearchSerializer,
                         )
-from .models import Goal, Todo, Diary, User, Profile
+from .models import Goal, Todo, Diary, User, Profile, Comment
 
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -24,7 +28,7 @@ from django.http import Http404
 
 from django.shortcuts import get_object_or_404
 
-from django.db.models import Q
+from django.db.models import Q, OuterRef, Subquery, Count
 
 from datetime import datetime
 
@@ -33,6 +37,46 @@ from rest_framework.pagination import CursorPagination
 class CustomCursorPagination(CursorPagination):
     ordering = '-id'
     page_size = 3
+
+    def paginate_queryset(self, queryset, request, view=None):
+        if self.ordering:
+            queryset = queryset.order_by(self.ordering)
+
+        return super().paginate_queryset(queryset, request, view)
+    
+class TodoFeedCursorPagination(CursorPagination):
+    ordering = '-user_id'
+    page_size = 10
+
+    def paginate_queryset(self, queryset, request, view=None):
+        if self.ordering:
+            queryset = queryset.order_by(self.ordering)
+
+        return super().paginate_queryset(queryset, request, view)
+
+class SearchCursorPagination(CursorPagination):
+    ordering = '-user_id'
+    page_size = 20
+
+    def paginate_queryset(self, queryset, request, view=None):
+        if self.ordering:
+            queryset = queryset.order_by(self.ordering)
+
+        return super().paginate_queryset(queryset, request, view)
+
+class DiaryCursorPagination(CursorPagination):
+    ordering = '-id'
+    page_size = 10
+
+    def paginate_queryset(self, queryset, request, view=None):
+        if self.ordering:
+            queryset = queryset.order_by(self.ordering)
+
+        return super().paginate_queryset(queryset, request, view)
+
+class UserAllCursorPagination(CursorPagination):
+    ordering = '-user_id'
+    page_size = 20
 
     def paginate_queryset(self, queryset, request, view=None):
         if self.ordering:
@@ -225,7 +269,7 @@ class ProfileDetailAPIView(RetrieveUpdateAPIView):
     
 class DiaryFeedListAPIView(ListAPIView):
     serializer_class = DiarySerializer
-    pagination_class = CustomCursorPagination
+    pagination_class = DiaryCursorPagination
     
     def get_queryset(self):
         user_id = self.kwargs.get('user_id')
@@ -233,6 +277,81 @@ class DiaryFeedListAPIView(ListAPIView):
         queryset = Diary.objects.filter((Q(created_by__in=user.following.all()) & Q(visibility='FL')) | Q(visibility='PB'))
         return queryset
     
-
+class TodoFeedListAPIView(ListAPIView):
+    serializer_class = ProfileTodoSerializer
+    pagination_class = TodoFeedCursorPagination
     
+    def get_queryset(self):
+        queryset = Profile.objects.filter(
+            Q(user__todos__is_completed=True) &
+            Q(user__todos__goal__visibility='PB')
+        ).distinct()
 
+        return queryset
+
+class TodoSearchAPIView(ListAPIView):
+    serializer_class = ProfileTodoSearchSerializer
+    pagination_class = TodoFeedCursorPagination
+    
+    def get_queryset(self):
+        subquery = Todo.objects.filter(
+            created_by=OuterRef('user'),
+            goal__visibility='PB',
+            title__icontains=self.request.query_params.get('title', '')
+        ).values('created_by').order_by().annotate(count=Count('id')).values('count')[:1]
+
+        queryset = Profile.objects.annotate(
+            num_matching_todos=Subquery(subquery)
+        ).filter(num_matching_todos__gt=0).distinct()
+
+        return queryset
+    
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['title'] = self.request.query_params.get('title', '')
+        return context
+
+class DiaryLikeAPIView(CreateAPIView):
+    serializer_class = LikeSerializer
+    
+    def perform_create(self, serializer):
+        user_id = self.kwargs.get('user_id')
+        date = self.kwargs.get('date')
+        diary = Diary.objects.get(created_by_id=user_id, date=date)
+        return serializer.save(liked_object=diary)
+
+class TodoLikeAPIView(CreateAPIView):
+    serializer_class = LikeSerializer
+    
+    def perform_create(self, serializer):
+        todo_id = self.kwargs.get('todo_id')
+        todo = Todo.objects.get(id=todo_id)
+        return serializer.save(liked_object=todo)
+    
+class DiaryCommentAPIView(CreateAPIView):
+    serializer_class = CommentSerializer
+    
+    def perform_create(self, serializer):
+        user_id = self.kwargs.get('user_id')
+        date = self.kwargs.get('date')
+        diary = Diary.objects.get(created_by_id=user_id, date=date)
+        return serializer.save(commented_object=diary)
+    
+class UserSearchAPIView(ListAPIView):
+    serializer_class = ProfileSerializer
+    pagination_class = SearchCursorPagination
+
+    def get_queryset(self):
+        username = self.request.query_params.get('username')
+        queryset = Profile.objects.filter(username__icontains=username)
+        return queryset
+    
+class UserAllAPIView(ListAPIView):
+    serializer_class = ProfileSerializer
+    pagination_class = UserAllCursorPagination
+    queryset = Profile.objects.all()
+
+class CommentDetailAPIView(RetrieveUpdateDestroyAPIView):
+    serializer_class = CommentSerializer
+    queryset = Comment.objects.all()
+    lookup_url_kwarg = 'comment_id'

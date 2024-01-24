@@ -90,8 +90,12 @@ WSGI_APPLICATION = 'toyproject.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'watomate_db',
+        'USER': 'watomate',
+        'PASSWORD': 'adminadmin',
+        'HOST': 'awseb-e-ytqjpucmtr-stack-awsebrdsdatabase-b5yu8toa8k3r.c74cu86qyx3r.ap-northeast-2.rds.amazonaws.com',
+        'PORT': '3306',
     }
 }
 

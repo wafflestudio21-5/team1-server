@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import *
+from django.db.models import Q
 
 class SignUpSerializer(serializers.ModelSerializer):
     class Meta:
@@ -32,10 +33,12 @@ class KakaoLoginSerializer(serializers.ModelSerializer):
         ]
 
 class LikeSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = Like
         fields = [
-            'user'
+            'user',
+            'emoji'
         ]
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -45,7 +48,8 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = [
-            'created_at',
+            'id',
+            'created_at_iso',
             'user',
             'description',
             'likes',
@@ -60,9 +64,10 @@ class TodoSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'title', 
+            'created_by',
             'description',
-            'reminder',
-            'created_at',
+            'reminder_iso',
+            'created_at_iso',
             'date',
             'is_completed',
             'goal',
@@ -71,18 +76,24 @@ class TodoSerializer(serializers.ModelSerializer):
 
 class TodoConciseSerializer(serializers.ModelSerializer):
     likes = LikeSerializer(many=True, read_only=True)
+    color = serializers.SerializerMethodField()
     class Meta:
         model = Todo
         fields = [
             'id',
             'title', 
+            'color',
             'description',
-            'reminder',
-            'created_at',
+            'reminder_iso',
+            'created_at_iso',
             'date',
             'is_completed',
             'likes',
         ]
+
+    def get_color(self, obj):
+        color = obj.goal.color
+        return color
 
 class GoalSerializer(serializers.ModelSerializer):
 
@@ -95,7 +106,7 @@ class GoalSerializer(serializers.ModelSerializer):
             'title', 
             'visibility',
             'color',
-            'created_at',
+            'created_at_iso',
             'todos',
         ]
 
@@ -162,3 +173,28 @@ class ProfileSerializer(serializers.ModelSerializer):
         representation['following_count'] = instance.user.following.count()
 
         return representation
+    
+class ProfileTodoSerializer(serializers.ModelSerializer):
+
+    todos = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Profile
+        fields = ['username', 'intro', 'profile_pic', 'todos']
+
+    def get_todos(self, obj):
+        todos = obj.user.todos.filter(Q(is_completed=True) & Q(goal__visibility='PB')).order_by('created_at')[:5]
+        return TodoConciseSerializer(todos, many=True).data
+
+class ProfileTodoSearchSerializer(serializers.ModelSerializer):
+
+    todos = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Profile
+        fields = ['username', 'intro', 'profile_pic', 'todos']
+
+    def get_todos(self, obj):
+        keyword = self.context.get('title', '')
+        todos = obj.user.todos.filter(Q(goal__visibility='PB') & Q(title__icontains=keyword)).order_by('created_at')
+        return TodoConciseSerializer(todos, many=True).data    
