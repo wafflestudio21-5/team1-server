@@ -34,7 +34,7 @@ class User(AbstractUser):
     objects = CustomUserManager()
 
     email = models.EmailField(null=True, unique=True)
-    kakao_id = models.IntegerField(null=True, blank=True, unique=True)
+    kakao_id = models.BigIntegerField(null=True, blank=True, unique=True)
     password = models.CharField(max_length=128)
     created_at = models.DateTimeField(auto_now_add=True)
     following = models.ManyToManyField('self', related_name='followers', symmetrical=False)
