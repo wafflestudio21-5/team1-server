@@ -1,4 +1,4 @@
-from rest_framework.generics import CreateAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView, RetrieveAPIView, RetrieveUpdateAPIView
+from rest_framework.generics import UpdateAPIView, CreateAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView, RetrieveAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin
 from rest_framework.authtoken.models import Token
@@ -9,10 +9,10 @@ from .serializers import (  TodoSerializer,
                             FollowRelationSerializer, 
                             TodoConciseSerializer, 
                             ProfileSerializer,
-                            SignUpKakaoSerializer,
                             SignUpSerializer,
-                            EmailLoginSerializer,
-                            KakaoLoginSerializer,
+                            PasswordChangeSerializer,
+                            ChangeLoginProfileSerializer,
+                            DeleteUserSerializer,
                             LikeSerializer,
                             CommentSerializer,
                             ProfileTodoSearchSerializer,
@@ -84,6 +84,8 @@ class UserAllCursorPagination(CursorPagination):
 
         return super().paginate_queryset(queryset, request, view)
 
+## Signup API Views
+
 class SignUpAPIView(CreateAPIView):
     serializer_class = SignUpSerializer
 
@@ -108,12 +110,11 @@ class SignUpAPIView(CreateAPIView):
         }, status=status.HTTP_400_BAD_REQUEST)
 
 
-
 class SignUpKakaoAPIView(CreateAPIView):
-    serializer_class = SignUpKakaoSerializer
+    serializer_class = SignUpSerializer
 
     def post(self, request, *args, **kwargs):
-        serializer = SignUpKakaoSerializer(data=request.data)
+        serializer = SignUpSerializer(data=request.data)
         if serializer.is_valid():
             if request.data['kakao_id'] == '':
                 return Response({
@@ -138,8 +139,8 @@ class SignupGuestAPIView(RetrieveAPIView): # need to review...
             "user_id": user.id
         }, status=status.HTTP_200_OK)
 
+
 class LoginEmailAPIView(CreateAPIView):
-    serializer_class = EmailLoginSerializer
 
     def post(self, request, *args, **kwargs):
         try: 
@@ -160,8 +161,8 @@ class LoginEmailAPIView(CreateAPIView):
                     "error_msg" : "User with this email does not exist",
                 }, status=status.HTTP_200_OK)
 
+
 class LoginKakaoAPIView(CreateAPIView):
-    serializer_class = KakaoLoginSerializer
 
     def post(self, request, *args, **kwargs):
         try: 
@@ -174,6 +175,80 @@ class LoginKakaoAPIView(CreateAPIView):
         except ObjectDoesNotExist:
             return Response({
                 }, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+
+class ChangePasswordAPIView(UpdateAPIView):
+    permissions_classes = [IsAuthenticated]
+    serializer_class = PasswordChangeSerializer
+    lookup_url_kwarg = 'user_id'
+
+    def get_object(self):
+        user_id = self.kwargs.get('user_id')
+        return User.objects.get(id=user_id)
+
+    def put(self, request, *args, **kwargs):
+        user = self.get_object()
+        old_password = request.data.get('old_password')
+        new_password = request.data.get('new_password')
+
+        if user.password == old_password:
+            user.password = new_password
+            user.save()
+            return Response({
+                "result" : "SUCCESS",
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({
+                "error_msg" : "Wrong password",
+            }, status=status.HTTP_200_OK)
+
+class UpdateLoginProfileAPIView(RetrieveUpdateAPIView):
+    permissions_classes = [IsAuthenticated]
+    serializer_class = ChangeLoginProfileSerializer
+    lookup_url_kwarg = 'user_id'
+
+    def get_object(self):
+        user_id = self.kwargs.get('user_id')
+        return User.objects.get(id=user_id)
+
+    def put(self, request, *args, **kwargs):
+        user_id = self.kwargs.get('user_id')
+        user = User.objects.get(id=user_id)
+        if user.password == request.data['password']:
+            if request.data['email'] != "":
+                user.email = request.data['email']
+            if request.data['kakao_id'] != "":
+                user.kakao_id = request.data['kakao_id']
+            user.save()
+            return Response({
+                "result" : "SUCCESS",
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({
+                "error_msg" : "Wrong password",
+            }, status=status.HTTP_200_OK)
+
+class DeleteUserAPIView(RetrieveUpdateAPIView):
+    permissions_classes = [IsAuthenticated]
+    serializer_class = DeleteUserSerializer
+    lookup_url_kwarg = 'user_id'
+
+    def get_object(self):
+        user_id = self.kwargs.get('user_id')
+        return User.objects.get(id=user_id)
+
+    def put(self, request, *args, **kwargs):
+        user_id = self.kwargs.get('user_id')
+        user = User.objects.get(id=user_id)
+        if user.password == request.data['password']:
+            user.delete()
+            return Response({
+                "result" : "SUCCESS",
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({
+                "error_msg" : "Wrong password",
+            }, status=status.HTTP_200_OK)
 
 class GoalListCreateAPIView(ListCreateAPIView):
     serializer_class = GoalSerializer
