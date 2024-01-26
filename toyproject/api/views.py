@@ -163,7 +163,7 @@ class LoginEmailAPIView(CreateAPIView):
 
 
 class LoginKakaoAPIView(CreateAPIView):
-
+    
     def post(self, request, *args, **kwargs):
         try: 
             user = User.objects.get(kakao_id=request.data['kakao_id'])
