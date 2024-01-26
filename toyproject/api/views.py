@@ -1,5 +1,5 @@
 from rest_framework.generics import UpdateAPIView, CreateAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView, RetrieveAPIView, RetrieveUpdateAPIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin
 from rest_framework.authtoken.models import Token
 from .serializers import (  TodoSerializer,
@@ -90,6 +90,7 @@ class UserAllCursorPagination(CursorPagination):
 
 class SignUpAPIView(CreateAPIView):
     serializer_class = SignUpSerializer
+    permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
         serializer = SignUpSerializer(data=request.data)
@@ -114,6 +115,7 @@ class SignUpAPIView(CreateAPIView):
 
 class SignUpKakaoAPIView(CreateAPIView):
     serializer_class = SignUpSerializer
+    permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
         serializer = SignUpSerializer(data=request.data)
@@ -133,7 +135,10 @@ class SignUpKakaoAPIView(CreateAPIView):
         }, status=status.HTTP_400_BAD_REQUEST)
 
 
-class SignupGuestAPIView(RetrieveAPIView): # need to review...
+class SignupGuestAPIView(RetrieveAPIView): 
+
+    permission_classes = [AllowAny]
+
     def get(self, request, *args, **kwargs):
         user = User.objects.create()
         return Response({
@@ -145,7 +150,7 @@ class SignupGuestAPIView(RetrieveAPIView): # need to review...
 class LoginEmailAPIView(CreateAPIView):
 
     serializer_class = EmailLoginSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
         try: 
@@ -170,6 +175,7 @@ class LoginEmailAPIView(CreateAPIView):
 class LoginKakaoAPIView(CreateAPIView):
 
     serializer_class = KakaoLoginSerializer
+    permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
         try: 
@@ -256,9 +262,13 @@ class DeleteUserAPIView(RetrieveUpdateAPIView):
             return Response({
                 "error_msg" : "Wrong password",
             }, status=status.HTTP_200_OK)
+        
+# 1. create a separate ListAPIView for viewing other users' goals
+# 2. change ListCreateAPIView's permission_class to custom 
 
 class GoalListCreateAPIView(ListCreateAPIView):
     serializer_class = GoalSerializer
+    permission_classes = [IsAuthenticated] 
 
     def perform_create(self, serializer):
         user_id = self.kwargs.get('user_id')
@@ -275,6 +285,7 @@ class GoalListCreateAPIView(ListCreateAPIView):
 
 class GoalDetailAPIView(RetrieveUpdateDestroyAPIView):
     serializer_class = GoalSerializer
+    permission_classes = [IsAuthenticated]
     lookup_url_kwarg = 'goal_id'
 
     def get_queryset(self):
@@ -287,6 +298,7 @@ class GoalDetailAPIView(RetrieveUpdateDestroyAPIView):
 
 class TodoListCreateAPIView(ListCreateAPIView):
     serializer_class = TodoConciseSerializer
+    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         goal_id = self.kwargs.get('goal_id')
@@ -304,6 +316,7 @@ class TodoListCreateAPIView(ListCreateAPIView):
     
 class TodoDetailAPIView(RetrieveUpdateDestroyAPIView):
     serializer_class = TodoSerializer
+    permission_classes = [IsAuthenticated]
     lookup_url_kwarg = 'todo_id'
 
     def get_queryset(self):
@@ -314,8 +327,10 @@ class TodoDetailAPIView(RetrieveUpdateDestroyAPIView):
             raise Http404("Error: User not found")
         return Todo.objects.filter(created_by=user)
 
+# need custom permission_class
 class DiaryCreateAPIView(CreateAPIView):
     serializer_class = DiarySerializer
+    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         if self.request.user is User:
@@ -325,6 +340,7 @@ class DiaryCreateAPIView(CreateAPIView):
     
 class DiaryListAPIView(ListAPIView):
     serializer_class = DiarySerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         user_id = self.kwargs.get('user_id')
@@ -332,6 +348,7 @@ class DiaryListAPIView(ListAPIView):
     
 class DiaryDetailAPIView(RetrieveUpdateDestroyAPIView):
     serializer_class = DiarySerializer
+    permission_classes = [IsAuthenticated]
 
     def get_object(self):
         date = datetime.strptime(self.kwargs['date'], '%Y-%m-%d').date()
@@ -341,16 +358,19 @@ class DiaryDetailAPIView(RetrieveUpdateDestroyAPIView):
     
 class FollowRelationAPIView(RetrieveAPIView):
     serializer_class = FollowRelationSerializer
+    permission_classes = [IsAuthenticated]
     queryset = User.objects.all()
     lookup_url_kwarg = 'user_id'
 
 class ProfileDetailAPIView(RetrieveUpdateAPIView):
     serializer_class = ProfileSerializer
+    permission_classes = [IsAuthenticated]
     queryset = Profile.objects.all()
     lookup_url_kwarg = 'user_id'
     
 class DiaryFeedListAPIView(ListAPIView):
     serializer_class = DiarySerializer
+    permission_classes = [IsAuthenticated]
     pagination_class = DiaryCursorPagination
     
     def get_queryset(self):
@@ -361,6 +381,7 @@ class DiaryFeedListAPIView(ListAPIView):
     
 class TodoFeedListAPIView(ListAPIView):
     serializer_class = ProfileTodoSerializer
+    permission_classes = [IsAuthenticated]
     pagination_class = TodoFeedCursorPagination
     
     def get_queryset(self):
@@ -373,6 +394,7 @@ class TodoFeedListAPIView(ListAPIView):
 
 class TodoSearchAPIView(ListAPIView):
     serializer_class = ProfileTodoSearchSerializer
+    permission_classes = [IsAuthenticated]
     pagination_class = TodoFeedCursorPagination
     
     def get_queryset(self):
@@ -395,6 +417,7 @@ class TodoSearchAPIView(ListAPIView):
 
 class DiaryLikeAPIView(CreateAPIView):
     serializer_class = LikeSerializer
+    permission_classes = [IsAuthenticated]
     
     def perform_create(self, serializer):
         user_id = self.kwargs.get('user_id')
@@ -404,6 +427,7 @@ class DiaryLikeAPIView(CreateAPIView):
 
 class TodoLikeAPIView(CreateAPIView):
     serializer_class = LikeSerializer
+    permission_classes = [IsAuthenticated]
     
     def perform_create(self, serializer):
         todo_id = self.kwargs.get('todo_id')
@@ -412,6 +436,7 @@ class TodoLikeAPIView(CreateAPIView):
     
 class DiaryCommentAPIView(CreateAPIView):
     serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated]
     
     def perform_create(self, serializer):
         user_id = self.kwargs.get('user_id')
@@ -421,6 +446,7 @@ class DiaryCommentAPIView(CreateAPIView):
     
 class UserSearchAPIView(ListAPIView):
     serializer_class = ProfileSerializer
+    permission_classes = [IsAuthenticated]
     pagination_class = SearchCursorPagination
 
     def get_queryset(self):
@@ -430,10 +456,12 @@ class UserSearchAPIView(ListAPIView):
     
 class UserAllAPIView(ListAPIView):
     serializer_class = ProfileSerializer
+    permission_classes = [IsAuthenticated]
     pagination_class = UserAllCursorPagination
     queryset = Profile.objects.all()
 
 class CommentDetailAPIView(RetrieveUpdateDestroyAPIView):
     serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated]
     queryset = Comment.objects.all()
     lookup_url_kwarg = 'comment_id'
