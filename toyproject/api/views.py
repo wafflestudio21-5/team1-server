@@ -131,7 +131,7 @@ class SignUpKakaoAPIView(CreateAPIView):
         }, status=status.HTTP_400_BAD_REQUEST)
 
 
-class SignupGuestAPIView(RetrieveAPIView): # need to review...
+class SignupGuestAPIView(RetrieveAPIView):
     def get(self, request, *args, **kwargs):
         user = User.objects.create()
         return Response({
