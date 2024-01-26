@@ -101,9 +101,7 @@ class Like(models.Model):
     object_id = models.PositiveIntegerField()
     liked_object = GenericForeignKey('content_type', 'object_id')
 
-    emoji = models.IntegerField(
-        validators=[MaxValueValidator(10), MinValueValidator(1)]
-    )
+    emoji = models.CharField(max_length=64)
 
     def __str__(self):
         return f"like by {self.user} on {self.liked_object}"
@@ -167,10 +165,7 @@ class Diary(models.Model):
         validators=[MaxValueValidator(100), MinValueValidator(1)]
     )
     image = models.ImageField(null=True, blank=True)
-    emoji = models.IntegerField(
-        default=1,
-        validators=[MaxValueValidator(10), MinValueValidator(1)]
-    )
+    emoji = models.CharField(max_length=64)
     color = models.CharField(max_length=25, default='white')
     created_by = models.ForeignKey(User, related_name='diarys', on_delete=models.CASCADE)
     date = models.DateField(default=date.today)

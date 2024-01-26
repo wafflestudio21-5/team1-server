@@ -16,6 +16,8 @@ from .serializers import (  TodoSerializer,
                             LikeSerializer,
                             CommentSerializer,
                             ProfileTodoSearchSerializer,
+                            EmailLoginSerializer,
+                            KakaoLoginSerializer,
                         )
 from .models import Goal, Todo, Diary, User, Profile, Comment
 
@@ -142,6 +144,9 @@ class SignupGuestAPIView(RetrieveAPIView): # need to review...
 
 class LoginEmailAPIView(CreateAPIView):
 
+    serializer_class = EmailLoginSerializer
+    permission_classes = [IsAuthenticated]
+
     def post(self, request, *args, **kwargs):
         try: 
             user = User.objects.get(email=request.data['email'])
@@ -163,6 +168,8 @@ class LoginEmailAPIView(CreateAPIView):
 
 
 class LoginKakaoAPIView(CreateAPIView):
+
+    serializer_class = KakaoLoginSerializer
 
     def post(self, request, *args, **kwargs):
         try: 
