@@ -153,7 +153,8 @@ class ProfileConciseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = [
-            'username'
+            'username',
+            'tedoori',
         ]
 
     def get_tedoori(self, obj):
@@ -210,7 +211,7 @@ class ProfileTodoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = ['username', 'intro', 'profile_pic', 'todos']
+        fields = ['username', 'intro', 'profile_pic', 'todos', 'tedoori']
 
     def get_todos(self, obj):
         todos = obj.user.todos.filter(Q(is_completed=True) & Q(goal__visibility='PB')).order_by('created_at')[:5]
