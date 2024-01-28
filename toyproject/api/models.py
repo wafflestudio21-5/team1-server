@@ -127,7 +127,7 @@ class Todo(models.Model):
     description = models.TextField(blank=True)
     reminder = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    date = models.DateField(default='', blank=True)
+    date = models.DateField(default=None, null=True, blank=True)
     is_completed = models.BooleanField(default=False)
     goal = models.ForeignKey(Goal, related_name='todos', on_delete=models.CASCADE)
     created_by = models.ForeignKey(User, related_name='todos', on_delete=models.CASCADE)
