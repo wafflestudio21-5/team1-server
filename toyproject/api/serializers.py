@@ -229,7 +229,7 @@ class ProfileTodoSearchSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = ['username', 'intro', 'profile_pic', 'todos']
+        fields = ['username', 'intro', 'profile_pic', 'todos', 'tedoori']
 
     def get_todos(self, obj):
         keyword = self.context.get('title', '')
