@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import *
 from django.db.models import Q
+from datetime import datetime
 
 class SignUpSerializer(serializers.ModelSerializer):
     class Meta:
@@ -146,11 +147,18 @@ class DiarySerializer(serializers.ModelSerializer):
         ]
 
 class ProfileConciseSerializer(serializers.ModelSerializer):
+    
+    tedoori = serializers.SerializerMethodField()
+    
     class Meta:
         model = Profile
         fields = [
             'username'
         ]
+
+    def get_tedoori(self, obj):
+        todos_for_today = obj.user.todos.filter(date=datetime.today().strftime('%Y-%m-%d'))
+        return todos_for_today.exists() and todos_for_today.filter(is_completed=True).count() == todos_for_today.count()
 
 class FollowSerializer(serializers.ModelSerializer):
     
@@ -177,6 +185,8 @@ class FollowRelationSerializer(serializers.ModelSerializer):
 
 class ProfileSerializer(serializers.ModelSerializer):
 
+    tedoori = serializers.SerializerMethodField()
+
     class Meta:
         model = Profile
         fields = '__all__'
@@ -188,7 +198,13 @@ class ProfileSerializer(serializers.ModelSerializer):
 
         return representation
     
+    def get_tedoori(self, obj):
+        todos_for_today = obj.user.todos.filter(date=datetime.today().strftime('%Y-%m-%d'))
+        return todos_for_today.exists() and todos_for_today.filter(is_completed=True).count() == todos_for_today.count()
+    
 class ProfileTodoSerializer(serializers.ModelSerializer):
+
+    tedoori = serializers.SerializerMethodField()
 
     todos = serializers.SerializerMethodField()
 
@@ -199,8 +215,14 @@ class ProfileTodoSerializer(serializers.ModelSerializer):
     def get_todos(self, obj):
         todos = obj.user.todos.filter(Q(is_completed=True) & Q(goal__visibility='PB')).order_by('created_at')[:5]
         return TodoConciseSerializer(todos, many=True).data
+    
+    def get_tedoori(self, obj):
+        todos_for_today = obj.user.todos.filter(date=datetime.today().strftime('%Y-%m-%d'))
+        return todos_for_today.exists() and todos_for_today.filter(is_completed=True).count() == todos_for_today.count()
 
 class ProfileTodoSearchSerializer(serializers.ModelSerializer):
+
+    tedoori = serializers.SerializerMethodField()
 
     todos = serializers.SerializerMethodField()
 
@@ -212,3 +234,7 @@ class ProfileTodoSearchSerializer(serializers.ModelSerializer):
         keyword = self.context.get('title', '')
         todos = obj.user.todos.filter(Q(goal__visibility='PB') & Q(title__icontains=keyword)).order_by('created_at')
         return TodoConciseSerializer(todos, many=True).data    
+    
+    def get_tedoori(self, obj):
+        todos_for_today = obj.user.todos.filter(date=datetime.today().strftime('%Y-%m-%d'))
+        return todos_for_today.exists() and todos_for_today.filter(is_completed=True).count() == todos_for_today.count()
