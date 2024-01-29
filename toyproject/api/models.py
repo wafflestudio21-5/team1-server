@@ -162,8 +162,9 @@ class Diary(models.Model):
         default=FOLLOWERS
     )
     mood = models.IntegerField(
-        default=50,
-        validators=[MaxValueValidator(100), MinValueValidator(1)]
+        validators=[MaxValueValidator(100), MinValueValidator(1)],
+        null=True,
+        blank=True
     )
     image = models.ImageField(null=True, blank=True)
     emoji = models.CharField(max_length=64)
