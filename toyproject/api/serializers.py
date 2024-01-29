@@ -81,14 +81,16 @@ class TodoSerializer(serializers.ModelSerializer):
             'id',
             'title',
             'color', 
-            'created_by',
             'description',
             'reminder_iso',
             'created_at_iso',
             'date',
             'is_completed',
-            'goal',
             'likes',
+        ]
+        read_only_fields = [
+            'created_by',
+            'goal',
         ]
     
     def get_color(self, obj):
