@@ -96,6 +96,7 @@ DATABASES = {
         'PASSWORD': 'adminadmin',
         'HOST': 'awseb-e-ytqjpucmtr-stack-awsebrdsdatabase-b5yu8toa8k3r.c74cu86qyx3r.ap-northeast-2.rds.amazonaws.com',
         'PORT': '3306',
+        'OPTIONS': {'charset': 'utf8mb4'},
     }
 }
 

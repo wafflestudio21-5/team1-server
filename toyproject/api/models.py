@@ -132,6 +132,7 @@ class Todo(models.Model):
     goal = models.ForeignKey(Goal, related_name='todos', on_delete=models.CASCADE)
     created_by = models.ForeignKey(User, related_name='todos', on_delete=models.CASCADE)
     likes = GenericRelation(Like)
+    image = models.ImageField(upload_to='todo_images/', null=True, blank=True)
 
     def __str__(self):
         return self.title
@@ -161,8 +162,9 @@ class Diary(models.Model):
         default=FOLLOWERS
     )
     mood = models.IntegerField(
-        default=50,
-        validators=[MaxValueValidator(100), MinValueValidator(1)]
+        validators=[MaxValueValidator(100), MinValueValidator(1)],
+        null=True,
+        blank=True
     )
     image = models.ImageField(null=True, blank=True)
     emoji = models.CharField(max_length=64)
