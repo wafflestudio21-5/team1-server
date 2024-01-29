@@ -145,9 +145,37 @@ class TodoDetailSerializer(serializers.ModelSerializer):
 #         color = obj.goal.color
 #         return color
 
+class TodoGoalViewSerializer(serializers.ModelSerializer):
+    
+    likes = LikeSerializer(many=True, read_only=True)
+    color = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Todo
+        fields = [
+            'id',
+            'title',
+            'color', 
+            'description',
+            'reminder_iso',
+            'created_at_iso',
+            'date',
+            'goal',
+            'is_completed',
+            'likes',
+        ]
+        read_only_fields = [
+            'created_by'
+        ]
+    
+    def get_color(self, obj):
+        color = obj.goal.color
+        return color
+
+
 class GoalSerializer(serializers.ModelSerializer):
 
-    todos = TodoSerializer(many=True, read_only=True)
+    todos = TodoGoalViewSerializer(many=True, read_only=True)
 
     class Meta:
         model = Goal
@@ -159,6 +187,7 @@ class GoalSerializer(serializers.ModelSerializer):
             'created_at_iso',
             'todos',
         ]
+
 
 class DiarySerializer(serializers.ModelSerializer):
     
