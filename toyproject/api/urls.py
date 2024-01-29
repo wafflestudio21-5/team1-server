@@ -44,7 +44,7 @@ urlpatterns = [
     path('todofeed', views.TodoFeedListAPIView.as_view()),
 
     # like API views
-    path('<int:user_id>/diarys/<str:date>/like', views.DiaryLikeAPIView.as_view()),
+    path('<int:user_id>/diarys/<str:date>/<int:diary_id>/like', views.DiaryLikeAPIView.as_view()),
     path('<int:user_id>/goals/<int:goal_id>/todos/<int:todo_id>/like', views.TodoLikeAPIView.as_view()),
 
     # comment API views

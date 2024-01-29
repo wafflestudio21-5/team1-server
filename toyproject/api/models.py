@@ -81,7 +81,7 @@ class Goal(models.Model):
         default=FOLLOWERS
     )
 
-    color = models.CharField(max_length=25, default='white')
+    color = models.CharField(max_length=25, default='blue')
 
     created_by = models.ForeignKey(User, related_name='goals', on_delete=models.CASCADE)
 
@@ -166,7 +166,7 @@ class Diary(models.Model):
     )
     image = models.ImageField(null=True, blank=True)
     emoji = models.CharField(max_length=64)
-    color = models.CharField(max_length=25, default='white')
+    color = models.CharField(max_length=25, default='blue')
     created_by = models.ForeignKey(User, related_name='diarys', on_delete=models.CASCADE)
     date = models.DateField(default=date.today)
     likes = GenericRelation(Like)

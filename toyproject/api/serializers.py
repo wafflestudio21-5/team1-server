@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import *
 from django.db.models import Q
+from datetime import datetime
 
 class SignUpSerializer(serializers.ModelSerializer):
     class Meta:
@@ -72,46 +73,83 @@ class CommentSerializer(serializers.ModelSerializer):
 class TodoSerializer(serializers.ModelSerializer):
     
     likes = LikeSerializer(many=True, read_only=True)
+    color = serializers.SerializerMethodField()
     
     class Meta:
         model = Todo
         fields = [
             'id',
-            'title', 
-            'created_by',
+            'title',
+            'color', 
             'description',
             'reminder_iso',
             'created_at_iso',
+            'date',
+            'is_completed',
+            'likes',
+            'goal',
+        ]
+        read_only_fields = [
+            'created_by',
+            'goal',
+        ]
+    
+    def get_color(self, obj):
+        color = obj.goal.color
+        return color
+    
+
+class TodoDetailSerializer(serializers.ModelSerializer):
+    
+    likes = LikeSerializer(many=True, read_only=True)
+    color = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Todo
+        fields = [
+            'id',
+            'title',
+            'color', 
+            'description',
+            'reminder_iso',
             'date',
             'is_completed',
             'goal',
             'likes',
         ]
-
-class TodoConciseSerializer(serializers.ModelSerializer):
-    likes = LikeSerializer(many=True, read_only=True)
-    color = serializers.SerializerMethodField()
-    class Meta:
-        model = Todo
-        fields = [
-            'id',
-            'title', 
-            'color',
-            'description',
-            'reminder_iso',
+        read_only_fields = [
+            'created_by',
             'created_at_iso',
-            'date',
-            'is_completed',
-            'likes',
         ]
-
+    
     def get_color(self, obj):
         color = obj.goal.color
         return color
 
+# class TodoConciseSerializer(serializers.ModelSerializer):
+#     likes = LikeSerializer(many=True, read_only=True)
+#     color = serializers.SerializerMethodField()
+#     class Meta:
+#         model = Todo
+#         fields = [
+#             'id',
+#             'title', 
+#             'color',
+#             'description',
+#             'reminder_iso',
+#             'created_at_iso',
+#             'date',
+#             'is_completed',
+#             'likes',
+#         ]
+
+#     def get_color(self, obj):
+#         color = obj.goal.color
+#         return color
+
 class GoalSerializer(serializers.ModelSerializer):
 
-    todos = TodoConciseSerializer(many=True, read_only=True)
+    todos = TodoSerializer(many=True, read_only=True)
 
     class Meta:
         model = Goal
@@ -123,6 +161,7 @@ class GoalSerializer(serializers.ModelSerializer):
             'created_at_iso',
             'todos',
         ]
+
 
 class DiarySerializer(serializers.ModelSerializer):
     
@@ -146,11 +185,19 @@ class DiarySerializer(serializers.ModelSerializer):
         ]
 
 class ProfileConciseSerializer(serializers.ModelSerializer):
+    
+    tedoori = serializers.SerializerMethodField()
+    
     class Meta:
         model = Profile
         fields = [
-            'username'
+            'username',
+            'tedoori',
         ]
+
+    def get_tedoori(self, obj):
+        todos_for_today = obj.user.todos.filter(date=datetime.today().strftime('%Y-%m-%d'))
+        return todos_for_today.exists() and todos_for_today.filter(is_completed=True).count() == todos_for_today.count()
 
 class FollowSerializer(serializers.ModelSerializer):
     
@@ -177,6 +224,8 @@ class FollowRelationSerializer(serializers.ModelSerializer):
 
 class ProfileSerializer(serializers.ModelSerializer):
 
+    tedoori = serializers.SerializerMethodField()
+
     class Meta:
         model = Profile
         fields = '__all__'
@@ -188,27 +237,43 @@ class ProfileSerializer(serializers.ModelSerializer):
 
         return representation
     
+    def get_tedoori(self, obj):
+        todos_for_today = obj.user.todos.filter(date=datetime.today().strftime('%Y-%m-%d'))
+        return todos_for_today.exists() and todos_for_today.filter(is_completed=True).count() == todos_for_today.count()
+    
 class ProfileTodoSerializer(serializers.ModelSerializer):
+
+    tedoori = serializers.SerializerMethodField()
 
     todos = serializers.SerializerMethodField()
 
     class Meta:
         model = Profile
-        fields = ['username', 'intro', 'profile_pic', 'todos']
+        fields = ['username', 'intro', 'profile_pic', 'todos', 'tedoori']
 
     def get_todos(self, obj):
         todos = obj.user.todos.filter(Q(is_completed=True) & Q(goal__visibility='PB')).order_by('created_at')[:5]
-        return TodoConciseSerializer(todos, many=True).data
+        return TodoSerializer(todos, many=True).data
+    
+    def get_tedoori(self, obj):
+        todos_for_today = obj.user.todos.filter(date=datetime.today().strftime('%Y-%m-%d'))
+        return todos_for_today.exists() and todos_for_today.filter(is_completed=True).count() == todos_for_today.count()
 
 class ProfileTodoSearchSerializer(serializers.ModelSerializer):
+
+    tedoori = serializers.SerializerMethodField()
 
     todos = serializers.SerializerMethodField()
 
     class Meta:
         model = Profile
-        fields = ['username', 'intro', 'profile_pic', 'todos']
+        fields = ['username', 'intro', 'profile_pic', 'todos', 'tedoori']
 
     def get_todos(self, obj):
         keyword = self.context.get('title', '')
         todos = obj.user.todos.filter(Q(goal__visibility='PB') & Q(title__icontains=keyword)).order_by('created_at')
-        return TodoConciseSerializer(todos, many=True).data    
+        return TodoSerializer(todos, many=True).data    
+    
+    def get_tedoori(self, obj):
+        todos_for_today = obj.user.todos.filter(date=datetime.today().strftime('%Y-%m-%d'))
+        return todos_for_today.exists() and todos_for_today.filter(is_completed=True).count() == todos_for_today.count()

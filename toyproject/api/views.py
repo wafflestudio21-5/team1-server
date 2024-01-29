@@ -3,11 +3,11 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin
 from rest_framework.authtoken.models import Token
 from .serializers import (  TodoSerializer,
+                            TodoDetailSerializer,
                             ProfileTodoSerializer, 
                             GoalSerializer, 
                             DiarySerializer, 
                             FollowRelationSerializer, 
-                            TodoConciseSerializer, 
                             ProfileSerializer,
                             SignUpSerializer,
                             PasswordChangeSerializer,
@@ -297,7 +297,7 @@ class GoalDetailAPIView(RetrieveUpdateDestroyAPIView):
         return Goal.objects.filter(created_by=user)
 
 class TodoListCreateAPIView(ListCreateAPIView):
-    serializer_class = TodoConciseSerializer
+    serializer_class = TodoSerializer
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
@@ -315,7 +315,7 @@ class TodoListCreateAPIView(ListCreateAPIView):
         return Todo.objects.filter(created_by=user, goal=Goal.objects.get(id=goal_id))
     
 class TodoDetailAPIView(RetrieveUpdateDestroyAPIView):
-    serializer_class = TodoSerializer
+    serializer_class = TodoDetailSerializer
     permission_classes = [IsAuthenticated]
     lookup_url_kwarg = 'todo_id'
 
@@ -422,7 +422,8 @@ class DiaryLikeAPIView(CreateAPIView):
     def perform_create(self, serializer):
         user_id = self.kwargs.get('user_id')
         date = self.kwargs.get('date')
-        diary = Diary.objects.get(created_by_id=user_id, date=date)
+        diary_id = self.kwargs.get('diary_id')
+        diary = Diary.objects.get(created_by_id=user_id, date=date, id=diary_id)
         return serializer.save(liked_object=diary)
 
 class TodoLikeAPIView(CreateAPIView):
