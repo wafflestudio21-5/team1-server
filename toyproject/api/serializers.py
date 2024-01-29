@@ -116,8 +116,10 @@ class TodoDetailSerializer(serializers.ModelSerializer):
             'is_completed',
             'goal',
             'likes',
+            'image',
         ]
         read_only_fields = [
+            'goal',
             'created_by',
             'created_at_iso',
         ]
@@ -125,6 +127,16 @@ class TodoDetailSerializer(serializers.ModelSerializer):
     def get_color(self, obj):
         color = obj.goal.color
         return color
+    
+    def get_fields(self, *args, **kwargs):
+        fields = super().get_fields(*args, **kwargs)
+
+        if self.instance and self.instance.is_completed:
+            fields['image'].read_only = False
+        else:
+            fields['image'].read_only = True
+
+        return fields
 
 # class TodoConciseSerializer(serializers.ModelSerializer):
 #     likes = LikeSerializer(many=True, read_only=True)
