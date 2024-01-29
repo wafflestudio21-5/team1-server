@@ -88,6 +88,7 @@ class TodoSerializer(serializers.ModelSerializer):
             'is_completed',
             'likes',
             'goal',
+            'image',
         ]
         read_only_fields = [
             'created_by',
