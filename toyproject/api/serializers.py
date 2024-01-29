@@ -73,12 +73,14 @@ class CommentSerializer(serializers.ModelSerializer):
 class TodoSerializer(serializers.ModelSerializer):
     
     likes = LikeSerializer(many=True, read_only=True)
+    color = serializers.SerializerMethodField()
     
     class Meta:
         model = Todo
         fields = [
             'id',
-            'title', 
+            'title',
+            'color', 
             'created_by',
             'description',
             'reminder_iso',
@@ -88,31 +90,62 @@ class TodoSerializer(serializers.ModelSerializer):
             'goal',
             'likes',
         ]
-
-class TodoConciseSerializer(serializers.ModelSerializer):
-    likes = LikeSerializer(many=True, read_only=True)
-    color = serializers.SerializerMethodField()
-    class Meta:
-        model = Todo
-        fields = [
-            'id',
-            'title', 
-            'color',
-            'description',
-            'reminder_iso',
-            'created_at_iso',
-            'date',
-            'is_completed',
-            'likes',
-        ]
-
+    
     def get_color(self, obj):
         color = obj.goal.color
         return color
 
+class TodoDetailSerializer(serializers.ModelSerializer):
+    
+    likes = LikeSerializer(many=True, read_only=True)
+    color = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Todo
+        fields = [
+            'id',
+            'title',
+            'color', 
+            'description',
+            'reminder_iso',
+            'date',
+            'is_completed',
+            'goal',
+            'likes',
+        ]
+        read_only_fields = [
+            'created_by',
+            'created_at_iso',
+        ]
+    
+    def get_color(self, obj):
+        color = obj.goal.color
+        return color
+
+# class TodoConciseSerializer(serializers.ModelSerializer):
+#     likes = LikeSerializer(many=True, read_only=True)
+#     color = serializers.SerializerMethodField()
+#     class Meta:
+#         model = Todo
+#         fields = [
+#             'id',
+#             'title', 
+#             'color',
+#             'description',
+#             'reminder_iso',
+#             'created_at_iso',
+#             'date',
+#             'is_completed',
+#             'likes',
+#         ]
+
+#     def get_color(self, obj):
+#         color = obj.goal.color
+#         return color
+
 class GoalSerializer(serializers.ModelSerializer):
 
-    todos = TodoConciseSerializer(many=True, read_only=True)
+    todos = TodoSerializer(many=True, read_only=True)
 
     class Meta:
         model = Goal
@@ -215,7 +248,7 @@ class ProfileTodoSerializer(serializers.ModelSerializer):
 
     def get_todos(self, obj):
         todos = obj.user.todos.filter(Q(is_completed=True) & Q(goal__visibility='PB')).order_by('created_at')[:5]
-        return TodoConciseSerializer(todos, many=True).data
+        return TodoSerializer(todos, many=True).data
     
     def get_tedoori(self, obj):
         todos_for_today = obj.user.todos.filter(date=datetime.today().strftime('%Y-%m-%d'))
@@ -234,7 +267,7 @@ class ProfileTodoSearchSerializer(serializers.ModelSerializer):
     def get_todos(self, obj):
         keyword = self.context.get('title', '')
         todos = obj.user.todos.filter(Q(goal__visibility='PB') & Q(title__icontains=keyword)).order_by('created_at')
-        return TodoConciseSerializer(todos, many=True).data    
+        return TodoSerializer(todos, many=True).data    
     
     def get_tedoori(self, obj):
         todos_for_today = obj.user.todos.filter(date=datetime.today().strftime('%Y-%m-%d'))
