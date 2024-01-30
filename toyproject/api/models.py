@@ -143,7 +143,7 @@ class Todo(models.Model):
     
     @property
     def reminder_iso(self):
-        return self.reminder.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+        return self.reminder.strftime('%p') + ' ' + self.reminder.strftime('%I:%M')
     
 class Diary(models.Model):
     description = models.TextField()
