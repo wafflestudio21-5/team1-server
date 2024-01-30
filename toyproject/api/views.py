@@ -420,10 +420,8 @@ class DiaryLikeAPIView(CreateAPIView):
     permission_classes = [IsAuthenticated]
     
     def perform_create(self, serializer):
-        user_id = self.kwargs.get('user_id')
-        date = self.kwargs.get('date')
         diary_id = self.kwargs.get('diary_id')
-        diary = Diary.objects.get(created_by_id=user_id, date=date, id=diary_id)
+        diary = Diary.objects.get(id=diary_id)
         return serializer.save(liked_object=diary)
 
 class TodoLikeAPIView(CreateAPIView):
@@ -440,9 +438,8 @@ class DiaryCommentAPIView(CreateAPIView):
     permission_classes = [IsAuthenticated]
     
     def perform_create(self, serializer):
-        user_id = self.kwargs.get('user_id')
-        date = self.kwargs.get('date')
-        diary = Diary.objects.get(created_by_id=user_id, date=date)
+        diary_id = self.kwargs.get('diary_id')
+        diary = Diary.objects.get(id=diary_id)
         return serializer.save(commented_object=diary)
     
 class UserSearchAPIView(ListAPIView):
