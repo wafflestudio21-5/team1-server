@@ -82,13 +82,14 @@ class TodoSerializer(serializers.ModelSerializer):
             'title',
             'color', 
             'description',
+            'reminder',
             'reminder_iso',
             'created_at_iso',
             'date',
             'is_completed',
             'likes',
             'goal',
-            'image',
+            'image'
         ]
         read_only_fields = [
             'created_by',
@@ -112,6 +113,7 @@ class TodoDetailSerializer(serializers.ModelSerializer):
             'title',
             'color', 
             'description',
+            'reminder',
             'reminder_iso',
             'date',
             'is_completed',

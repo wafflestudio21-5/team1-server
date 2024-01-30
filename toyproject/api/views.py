@@ -313,6 +313,7 @@ class TodoListCreateAPIView(ListCreateAPIView):
         except User.DoesNotExist:
             raise Http404("Error: User not found")
         return Todo.objects.filter(created_by=user, goal=Goal.objects.get(id=goal_id))
+
     
 class TodoDetailAPIView(RetrieveUpdateDestroyAPIView):
     serializer_class = TodoDetailSerializer

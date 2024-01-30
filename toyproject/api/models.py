@@ -125,7 +125,7 @@ class Comment(models.Model):
 class Todo(models.Model):
     title = models.CharField(max_length=32)
     description = models.TextField(blank=True)
-    reminder = models.DateTimeField(null=True, blank=True)
+    reminder = models.TimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     date = models.DateField(default=None, null=True, blank=True)
     is_completed = models.BooleanField(default=False)
