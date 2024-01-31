@@ -64,7 +64,7 @@ class ProfileConciseSerializer(serializers.ModelSerializer):
         model = Profile
         fields = [
             'username',
-            'profile_pic'
+            'profile_pic',
             'tedoori',
         ]
 
@@ -97,10 +97,10 @@ class CommentSerializer(serializers.ModelSerializer):
         return profile.username
     
     def get_profile_pic(self, obj):
-        profile = Profile.objects.get(user_id=obj.user.id)
-        if profile.profile_pic:
-            return profile.profile_pic
-        else:
+        try:
+            profile = Profile.objects.get(user_id=obj.user.id)
+            return profile.profile_pic.url if profile.profile_pic else None
+        except FileNotFoundError:
             return None
         
     def get_tedoori(self, obj):
