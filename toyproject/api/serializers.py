@@ -208,7 +208,7 @@ class GoalSerializer(serializers.ModelSerializer):
             date = datetime.strptime(date_param, '%Y-%m-%d')
             todos_serializer = TodoSerializer(todo_queryset.filter(date=date), many=True)
             return todos_serializer.data
-        except ValueError:
+        except:
             todos_serializer = TodoSerializer(todo_queryset, many=True)
             return todos_serializer.data
 
