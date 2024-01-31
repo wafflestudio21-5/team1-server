@@ -15,6 +15,7 @@ from .serializers import (  TodoSerializer,
                             DeleteUserSerializer,
                             LikeSerializer,
                             CommentSerializer,
+                            CommentEditSerializer,
                             ProfileTodoSearchSerializer,
                             EmailLoginSerializer,
                             KakaoLoginSerializer,
@@ -508,7 +509,14 @@ class UserAllAPIView(ListAPIView):
     queryset = Profile.objects.all()
 
 class CommentDetailAPIView(RetrieveUpdateDestroyAPIView):
-    serializer_class = CommentSerializer
     permission_classes = [IsAuthenticated]
     queryset = Comment.objects.all()
     lookup_url_kwarg = 'comment_id'
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return CommentSerializer
+        elif self.request.method in ['PATCH', 'PUT']:
+            return CommentEditSerializer
+        return CommentSerializer  # Default serializer
+    

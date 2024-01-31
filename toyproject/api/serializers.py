@@ -70,6 +70,15 @@ class CommentSerializer(serializers.ModelSerializer):
             'likes',
         ]
 
+class CommentEditSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Comment
+        fields = [
+            'id',
+            'description',
+        ]
+
 class TodoSerializer(serializers.ModelSerializer):
     
     likes = LikeSerializer(many=True, read_only=True)
