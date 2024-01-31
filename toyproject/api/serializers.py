@@ -186,27 +186,6 @@ class TodoDetailSerializer(serializers.ModelSerializer):
 
         return fields
 
-# class TodoConciseSerializer(serializers.ModelSerializer):
-#     likes = LikeSerializer(many=True, read_only=True)
-#     color = serializers.SerializerMethodField()
-#     class Meta:
-#         model = Todo
-#         fields = [
-#             'id',
-#             'title', 
-#             'color',
-#             'description',
-#             'reminder_iso',
-#             'created_at_iso',
-#             'date',
-#             'is_completed',
-#             'likes',
-#         ]
-
-#     def get_color(self, obj):
-#         color = obj.goal.color
-#         return color
-
 class GoalSerializer(serializers.ModelSerializer):
 
     todos = TodoSerializer(many=True, read_only=True)
@@ -286,6 +265,34 @@ class ProfileSerializer(serializers.ModelSerializer):
         todos_for_today = obj.user.todos.filter(date=datetime.today().strftime('%Y-%m-%d'))
         return todos_for_today.exists() and todos_for_today.filter(is_completed=True).count() == todos_for_today.count()
     
+class ProfileSearchAndAllSerializer(serializers.ModelSerializer):
+
+    tedoori = serializers.SerializerMethodField()
+
+    goal_colors = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Profile
+        fields = '__all__'
+
+    def to_representation(self, instance):
+        representation = super(ProfileSearchAndAllSerializer, self).to_representation(instance)
+        representation['follower_count'] = instance.user.followers.count()
+        representation['following_count'] = instance.user.following.count()
+
+        return representation
+    
+    def get_tedoori(self, obj):
+        todos_for_today = obj.user.todos.filter(date=datetime.today().strftime('%Y-%m-%d'))
+        return todos_for_today.exists() and todos_for_today.filter(is_completed=True).count() == todos_for_today.count()
+    
+    def get_goal_colors(self, obj):
+        goal_colors = []
+        goals = obj.user.goals.filter(visibility='PB').order_by('created_at')[:3]
+        for goal in goals:
+            goal_colors.append(goal.color)
+        return goal_colors
+    
 class ProfileTodoSerializer(serializers.ModelSerializer):
 
     tedoori = serializers.SerializerMethodField()
@@ -322,3 +329,5 @@ class ProfileTodoSearchSerializer(serializers.ModelSerializer):
     def get_tedoori(self, obj):
         todos_for_today = obj.user.todos.filter(date=datetime.today().strftime('%Y-%m-%d'))
         return todos_for_today.exists() and todos_for_today.filter(is_completed=True).count() == todos_for_today.count()
+
+        

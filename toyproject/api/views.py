@@ -9,6 +9,7 @@ from .serializers import (  TodoSerializer,
                             DiarySerializer, 
                             FollowRelationSerializer, 
                             ProfileSerializer,
+                            ProfileSearchAndAllSerializer,
                             SignUpSerializer,
                             PasswordChangeSerializer,
                             ChangeLoginProfileSerializer,
@@ -522,7 +523,7 @@ class DiaryCommentAPIView(CreateAPIView):
         return serializer.save(commented_object=diary)
     
 class UserSearchAPIView(ListAPIView):
-    serializer_class = ProfileSerializer
+    serializer_class = ProfileSearchAndAllSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = SearchCursorPagination
 
@@ -532,7 +533,7 @@ class UserSearchAPIView(ListAPIView):
         return queryset
     
 class UserAllAPIView(ListAPIView):
-    serializer_class = ProfileSerializer
+    serializer_class = ProfileSearchAndAllSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = UserAllCursorPagination
     queryset = Profile.objects.all()
