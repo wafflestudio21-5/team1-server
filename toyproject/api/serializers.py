@@ -56,9 +56,28 @@ class LikeSerializer(serializers.ModelSerializer):
             'emoji'
         ]
 
+class ProfileConciseSerializer(serializers.ModelSerializer):
+    
+    tedoori = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Profile
+        fields = [
+            'username',
+            'profile_pic'
+            'tedoori',
+        ]
+
+    def get_tedoori(self, obj):
+        todos_for_today = obj.user.todos.filter(date=datetime.today().strftime('%Y-%m-%d'))
+        return todos_for_today.exists() and todos_for_today.filter(is_completed=True).count() == todos_for_today.count()
+
 class CommentSerializer(serializers.ModelSerializer):
     
     likes = LikeSerializer(many=True, read_only=True)
+    username = serializers.SerializerMethodField()
+    profile_pic = serializers.SerializerMethodField()
+    tedoori = serializers.SerializerMethodField()
     
     class Meta:
         model = Comment
@@ -66,9 +85,27 @@ class CommentSerializer(serializers.ModelSerializer):
             'id',
             'created_at_iso',
             'user',
+            'username',
+            'profile_pic',
+            'tedoori',
             'description',
             'likes',
         ]
+    
+    def get_username(self, obj):
+        profile = Profile.objects.get(user_id=obj.user.id)
+        return profile.username
+    
+    def get_profile_pic(self, obj):
+        profile = Profile.objects.get(user_id=obj.user.id)
+        if profile.profile_pic:
+            return profile.profile_pic
+        else:
+            return None
+        
+    def get_tedoori(self, obj):
+        todos_for_today = obj.user.todos.filter(date=datetime.today().strftime('%Y-%m-%d'))
+        return todos_for_today.exists() and todos_for_today.filter(is_completed=True).count() == todos_for_today.count()
 
 class CommentEditSerializer(serializers.ModelSerializer):
     
@@ -206,21 +243,6 @@ class DiarySerializer(serializers.ModelSerializer):
             'likes',
             'comments',
         ]
-
-class ProfileConciseSerializer(serializers.ModelSerializer):
-    
-    tedoori = serializers.SerializerMethodField()
-    
-    class Meta:
-        model = Profile
-        fields = [
-            'username',
-            'tedoori',
-        ]
-
-    def get_tedoori(self, obj):
-        todos_for_today = obj.user.todos.filter(date=datetime.today().strftime('%Y-%m-%d'))
-        return todos_for_today.exists() and todos_for_today.filter(is_completed=True).count() == todos_for_today.count()
 
 class FollowSerializer(serializers.ModelSerializer):
     
