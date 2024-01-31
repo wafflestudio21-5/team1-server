@@ -482,7 +482,36 @@ class TodoLikeAPIView(CreateAPIView, UpdateAPIView):
         todo = Todo.objects.get(id=todo_id)
 
         return serializer.save(liked_object=todo, emoji=emoji)
+
+class CommentLikeAPIView(CreateAPIView, UpdateAPIView):
+    serializer_class = LikeSerializer
+    permission_classes = [IsAuthenticated]
     
+    def get_queryset(self):
+        return Like.objects.all()
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        comment_id = self.kwargs.get('comment_id')
+        user_id = self.request.data.get('user')
+        
+        obj = queryset.filter(user=User.objects.get(id=user_id), content_type__model='comment', object_id=comment_id).first()
+        return obj
+
+    
+    def perform_create(self, serializer):
+        comment_id = self.kwargs.get('comment_id')
+        comment = Comment.objects.get(id=comment_id)
+
+        return serializer.save(liked_object=comment)
+    
+    def perform_update(self, serializer):
+        comment_id = self.kwargs.get('comment_id')
+        emoji = self.request.data.get('emoji')
+        comment = Comment.objects.get(id=comment_id)
+
+        return serializer.save(liked_object=comment, emoji=emoji)
+
 class DiaryCommentAPIView(CreateAPIView):
     serializer_class = CommentSerializer
     permission_classes = [IsAuthenticated]

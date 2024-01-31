@@ -75,7 +75,6 @@ class CommentEditSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = [
-            'id',
             'description',
         ]
 
