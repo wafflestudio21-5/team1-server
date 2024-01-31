@@ -288,7 +288,7 @@ class ProfileSearchAndAllSerializer(serializers.ModelSerializer):
     
     def get_goal_colors(self, obj):
         goal_colors = []
-        goals = obj.user.goals.filter(visibility='PB').order_by('created_at')[:3]
+        goals = obj.user.goals.filter(visibility='PB').order_by('created_at')[:4]
         for goal in goals:
             goal_colors.append(goal.color)
         return goal_colors
