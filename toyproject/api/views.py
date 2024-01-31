@@ -284,6 +284,10 @@ class GoalListCreateAPIView(ListCreateAPIView):
         except User.DoesNotExist:
             raise Http404("Error: User not found")
         return Goal.objects.filter(created_by=user)
+    
+    def get_serializer_context(self):
+        date = self.request.query_params.get('date')
+        return {'date': date}
 
 
 class GoalDetailAPIView(RetrieveUpdateDestroyAPIView):
