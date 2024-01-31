@@ -19,9 +19,10 @@ from .serializers import (  TodoSerializer,
                             EmailLoginSerializer,
                             KakaoLoginSerializer,
                         )
-from .models import Goal, Todo, Diary, User, Profile, Comment
+from .models import Goal, Todo, Diary, User, Profile, Comment, Like
 
 from django.core.exceptions import ObjectDoesNotExist
+from rest_framework.exceptions import ValidationError
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -416,23 +417,70 @@ class TodoSearchAPIView(ListAPIView):
         context['title'] = self.request.query_params.get('title', '')
         return context
 
-class DiaryLikeAPIView(CreateAPIView):
+class DiaryLikeAPIView(CreateAPIView, UpdateAPIView):
     serializer_class = LikeSerializer
     permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        return Like.objects.all()
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        diary_id = self.kwargs.get('diary_id')
+        user_id = self.request.data.get('user')
+        
+        obj = queryset.filter(user=User.objects.get(id=user_id), content_type__model='diary', object_id=diary_id).first()
+        return obj
+
     
     def perform_create(self, serializer):
         diary_id = self.kwargs.get('diary_id')
+        user_id = self.request.data.get('user')
         diary = Diary.objects.get(id=diary_id)
-        return serializer.save(liked_object=diary)
 
-class TodoLikeAPIView(CreateAPIView):
+        if Like.objects.filter(user=User.objects.get(id=user_id), content_type__model='diary', object_id=diary_id).exists():
+            raise ValidationError(f'User {user_id} has already liked this diary.')
+
+        return serializer.save(liked_object=diary)
+    
+    def perform_update(self, serializer):
+        diary_id = self.kwargs.get('diary_id')
+        emoji = self.request.data.get('emoji')
+        diary = Diary.objects.get(id=diary_id)
+
+        return serializer.save(liked_object=diary, emoji=emoji)
+    
+class TodoLikeAPIView(CreateAPIView, UpdateAPIView):
     serializer_class = LikeSerializer
     permission_classes = [IsAuthenticated]
     
+    def get_queryset(self):
+        return Like.objects.all()
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        todo_id = self.kwargs.get('todo_id')
+        user_id = self.request.data.get('user')
+        
+        obj = queryset.filter(user=User.objects.get(id=user_id), content_type__model='todo', object_id=todo_id).first()
+        return obj
+    
     def perform_create(self, serializer):
         todo_id = self.kwargs.get('todo_id')
+        user_id = self.request.data.get('user')
         todo = Todo.objects.get(id=todo_id)
+
+        if Like.objects.filter(user=User.objects.get(id=user_id), content_type__model='todo', object_id=todo_id).exists():
+            raise ValidationError(f'User {user_id} has already liked this todo.')
+
         return serializer.save(liked_object=todo)
+    
+    def perform_update(self, serializer):
+        todo_id = self.kwargs.get('todo_id')
+        emoji = self.request.data.get('emoji')
+        todo = Todo.objects.get(id=todo_id)
+
+        return serializer.save(liked_object=todo, emoji=emoji)
     
 class DiaryCommentAPIView(CreateAPIView):
     serializer_class = CommentSerializer
