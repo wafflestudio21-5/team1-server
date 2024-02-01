@@ -35,11 +35,13 @@ urlpatterns = [
     path('<int:user_id>/goals/<int:goal_id>', views.GoalDetailAPIView.as_view()), 
     path('<int:user_id>/goals/<int:goal_id>/todos', views.TodoListCreateAPIView.as_view()),
     path('<int:user_id>/goals/<int:goal_id>/todos/<int:todo_id>', views.TodoDetailAPIView.as_view()),
+    path('<int:user_id>/goals/<int:goal_id>/todos/<int:todo_id>/image', views.TodoImageUploadAPIView.as_view()),
     
     # diary API views
     path('diary-create', views.DiaryCreateAPIView.as_view()),
     path('<int:user_id>/diarys', views.DiaryListAPIView.as_view()),
     path('<int:user_id>/diarys/<str:date>', views.DiaryDetailAPIView.as_view()),
+    
 
     # feedlist API views
     path('<int:user_id>/diaryfeed', views.DiaryFeedListAPIView.as_view()),

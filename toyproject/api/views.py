@@ -19,7 +19,8 @@ from .serializers import (  TodoSerializer,
                             ProfileTodoSearchSerializer,
                             EmailLoginSerializer,
                             KakaoLoginSerializer,
-                            PasswordEmailSerializer
+                            PasswordEmailSerializer,
+                            TodoImageUploadSerializer,
                         )
 from .models import Goal, Todo, Diary, User, Profile, Comment, Like
 
@@ -594,3 +595,13 @@ class CommentDetailAPIView(RetrieveUpdateDestroyAPIView):
             return CommentEditSerializer
         return CommentSerializer  # Default serializer
     
+class TodoImageUploadAPIView(RetrieveUpdateAPIView):
+    serializer_class = TodoImageUploadSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = Todo.objects.all()
+    lookup_url_kwarg = 'todo_id'
+
+    def perform_update(self, serializer):
+        image = self.request.data.get('image')
+        serializer.save(image=image)
+        

@@ -361,4 +361,8 @@ class ProfileTodoSearchSerializer(serializers.ModelSerializer):
         todos_for_today = obj.user.todos.filter(date=datetime.today().strftime('%Y-%m-%d'))
         return todos_for_today.exists() and todos_for_today.filter(is_completed=True).count() == todos_for_today.count()
 
-        
+class TodoImageUploadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Todo
+        fields = ['image']
+
