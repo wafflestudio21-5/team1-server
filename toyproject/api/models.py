@@ -125,7 +125,7 @@ class Comment(models.Model):
 class Todo(models.Model):
     title = models.CharField(max_length=32)
     description = models.TextField(blank=True)
-    reminder = models.DateTimeField(null=True, blank=True)
+    reminder = models.TimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     date = models.DateField(default=None, null=True, blank=True)
     is_completed = models.BooleanField(default=False)
@@ -143,7 +143,10 @@ class Todo(models.Model):
     
     @property
     def reminder_iso(self):
-        return self.reminder.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+        if self.reminder is None:
+            return None
+        else:
+            return self.reminder.strftime('%p') + ' ' + self.reminder.strftime('%I:%M')
     
 class Diary(models.Model):
     description = models.TextField()
