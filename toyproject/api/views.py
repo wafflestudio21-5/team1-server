@@ -13,13 +13,13 @@ from .serializers import (  TodoSerializer,
                             SignUpSerializer,
                             PasswordChangeSerializer,
                             ChangeLoginProfileSerializer,
-                            DeleteUserSerializer,
                             LikeSerializer,
                             CommentSerializer,
                             CommentEditSerializer,
                             ProfileTodoSearchSerializer,
                             EmailLoginSerializer,
                             KakaoLoginSerializer,
+                            PasswordEmailSerializer
                         )
 from .models import Goal, Todo, Diary, User, Profile, Comment, Like
 
@@ -39,10 +39,13 @@ from datetime import datetime
 
 from rest_framework.pagination import CursorPagination
 
+from django.core.mail import EmailMessage
 
-from django.core.email import EmailMessage
+class IsRefreshToken(BasePermission):
+    def has_permission(self, request, view, obj):
+        return 
 
-class IsUserToken(permissions.BasePermission):
+class IsUserToken(BasePermission):
     def has_permission(self, request, view, obj):
         return request.user == obj.user
 
@@ -253,25 +256,18 @@ class UpdateLoginProfileAPIView(RetrieveUpdateAPIView):
 
 class DeleteUserAPIView(RetrieveUpdateAPIView):
     permissions_classes = [IsAuthenticated]
-    serializer_class = DeleteUserSerializer
-    lookup_url_kwarg = 'user_id'
-
+    
     def get_object(self):
-        user_id = self.kwargs.get('user_id')
-        return User.objects.get(id=user_id)
-
-    def put(self, request, *args, **kwargs):
         user_id = self.kwargs.get('user_id')
         user = User.objects.get(id=user_id)
         user.delete()
-
         return Response({
             "result" : "SUCCESS",
         }, status=status.HTTP_200_OK)
 
 
-class GetPassswordEmailAPIView(CreateAPIView):
-    serializer_class = EmailLoginSerializer
+class GetPasswordEmailAPIView(CreateAPIView):
+    serializer_class = PasswordEmailSerializer
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
@@ -290,7 +286,6 @@ class GetPassswordEmailAPIView(CreateAPIView):
             return Response({
                 "error_msg" : "User with this email does not exist",
             }, status=status.HTTP_200_OK)
-
 
         
 # 1. create a separate ListAPIView for viewing other users' goals

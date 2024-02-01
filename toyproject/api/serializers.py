@@ -40,12 +40,8 @@ class ChangeLoginProfileSerializer(serializers.ModelSerializer):
             'kakao_id',
         ]
 
-class DeleteUserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = [
-            'password',
-        ]
+class PasswordEmailSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
 
 class LikeSerializer(serializers.ModelSerializer):
     
