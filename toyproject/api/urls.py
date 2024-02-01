@@ -35,7 +35,9 @@ urlpatterns = [
     path('<int:user_id>/goals/<int:goal_id>', views.GoalDetailAPIView.as_view()), 
     path('<int:user_id>/goals/<int:goal_id>/todos', views.TodoListCreateAPIView.as_view()),
     path('<int:user_id>/goals/<int:goal_id>/todos/<int:todo_id>', views.TodoDetailAPIView.as_view()),
-    path('<int:user_id>/goals/<int:goal_id>/todos/<int:todo_id>/image', views.TodoImageUploadAPIView.as_view()),
+
+    # todo shortcut: image upload API view
+    path('image-upload/<int:todo_id>', views.TodoImageUploadAPIView.as_view()),
     
     # diary API views
     path('diary-create', views.DiaryCreateAPIView.as_view()),
