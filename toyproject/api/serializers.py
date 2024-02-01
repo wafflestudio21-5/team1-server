@@ -204,13 +204,17 @@ class GoalSerializer(serializers.ModelSerializer):
     def get_todos(self, obj):
         todo_queryset = obj.todos.all()
         date_param = self.context.get('date')
-        try:
-            date = datetime.strptime(date_param, '%Y-%m-%d')
-            todos_serializer = TodoSerializer(todo_queryset.filter(date=date), many=True)
+        if date_param.lower() == 'null':
+            todos_serializer = TodoSerializer(todo_queryset.filter(date=None), many=True)
             return todos_serializer.data
-        except:
-            todos_serializer = TodoSerializer(todo_queryset, many=True)
-            return todos_serializer.data
+        else:
+            try:
+                date = datetime.strptime(date_param, '%Y-%m-%d')
+                todos_serializer = TodoSerializer(todo_queryset.filter(date=date), many=True)
+                return todos_serializer.data
+            except:
+                todos_serializer = TodoSerializer(todo_queryset, many=True)
+                return todos_serializer.data
 
 class DiarySerializer(serializers.ModelSerializer):
     
