@@ -1,5 +1,5 @@
 from rest_framework.generics import UpdateAPIView, CreateAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView, RetrieveAPIView, RetrieveUpdateAPIView
-from rest_framework.permissions import IsAuthenticated, AllowAny, permissions
+from rest_framework.permissions import IsAuthenticated, AllowAny, BasePermission
 from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin
 from rest_framework.authtoken.models import Token
 from .serializers import (  TodoSerializer,
@@ -9,19 +9,22 @@ from .serializers import (  TodoSerializer,
                             DiarySerializer, 
                             FollowRelationSerializer, 
                             ProfileSerializer,
+                            ProfileSearchAndAllSerializer,
                             SignUpSerializer,
                             PasswordChangeSerializer,
                             ChangeLoginProfileSerializer,
                             DeleteUserSerializer,
                             LikeSerializer,
                             CommentSerializer,
+                            CommentEditSerializer,
                             ProfileTodoSearchSerializer,
                             EmailLoginSerializer,
                             KakaoLoginSerializer,
                         )
-from .models import Goal, Todo, Diary, User, Profile, Comment
+from .models import Goal, Todo, Diary, User, Profile, Comment, Like
 
 from django.core.exceptions import ObjectDoesNotExist
+from rest_framework.exceptions import ValidationError
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -36,12 +39,12 @@ from datetime import datetime
 
 from rest_framework.pagination import CursorPagination
 
+
 from django.core.email import EmailMessage
 
 class IsUserToken(permissions.BasePermission):
     def has_permission(self, request, view, obj):
         return request.user == obj.user
-
 
 class CustomCursorPagination(CursorPagination):
     ordering = '-id'
@@ -308,6 +311,10 @@ class GoalListCreateAPIView(ListCreateAPIView):
         except User.DoesNotExist:
             raise Http404("Error: User not found")
         return Goal.objects.filter(created_by=user)
+    
+    def get_serializer_context(self):
+        date = self.request.query_params.get('date')
+        return {'date': date}
 
 
 class GoalDetailAPIView(RetrieveUpdateDestroyAPIView):
@@ -340,6 +347,7 @@ class TodoListCreateAPIView(ListCreateAPIView):
         except User.DoesNotExist:
             raise Http404("Error: User not found")
         return Todo.objects.filter(created_by=user, goal=Goal.objects.get(id=goal_id))
+
     
 class TodoDetailAPIView(RetrieveUpdateDestroyAPIView):
     serializer_class = TodoDetailSerializer
@@ -354,16 +362,12 @@ class TodoDetailAPIView(RetrieveUpdateDestroyAPIView):
             raise Http404("Error: User not found")
         return Todo.objects.filter(created_by=user)
 
-# need custom permission_class
 class DiaryCreateAPIView(CreateAPIView):
     serializer_class = DiarySerializer
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        if self.request.user is User:
-            return serializer.save(created_by=self.request.user)
-        else:
-            return serializer.save(created_by=User.objects.get(id=3))
+        return serializer.save(created_by=self.request.auth.user)
     
 class DiaryListAPIView(ListAPIView):
     serializer_class = DiarySerializer
@@ -442,38 +446,111 @@ class TodoSearchAPIView(ListAPIView):
         context['title'] = self.request.query_params.get('title', '')
         return context
 
-class DiaryLikeAPIView(CreateAPIView):
+class DiaryLikeAPIView(CreateAPIView, UpdateAPIView):
     serializer_class = LikeSerializer
     permission_classes = [IsAuthenticated]
     
-    def perform_create(self, serializer):
-        user_id = self.kwargs.get('user_id')
-        date = self.kwargs.get('date')
-        diary_id = self.kwargs.get('diary_id')
-        diary = Diary.objects.get(created_by_id=user_id, date=date, id=diary_id)
-        return serializer.save(liked_object=diary)
+    def get_queryset(self):
+        return Like.objects.all()
 
-class TodoLikeAPIView(CreateAPIView):
+    def get_object(self):
+        queryset = self.get_queryset()
+        diary_id = self.kwargs.get('diary_id')
+        user_id = self.request.data.get('user')
+        
+        obj = queryset.filter(user=User.objects.get(id=user_id), content_type__model='diary', object_id=diary_id).first()
+        return obj
+
+    
+    def perform_create(self, serializer):
+        diary_id = self.kwargs.get('diary_id')
+        user_id = self.request.data.get('user')
+        diary = Diary.objects.get(id=diary_id)
+
+        if Like.objects.filter(user=User.objects.get(id=user_id), content_type__model='diary', object_id=diary_id).exists():
+            raise ValidationError(f'User {user_id} has already liked this diary.')
+
+        return serializer.save(liked_object=diary)
+    
+    def perform_update(self, serializer):
+        diary_id = self.kwargs.get('diary_id')
+        emoji = self.request.data.get('emoji')
+        diary = Diary.objects.get(id=diary_id)
+
+        return serializer.save(liked_object=diary, emoji=emoji)
+    
+class TodoLikeAPIView(CreateAPIView, UpdateAPIView):
     serializer_class = LikeSerializer
     permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        return Like.objects.all()
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        todo_id = self.kwargs.get('todo_id')
+        user_id = self.request.data.get('user')
+        
+        obj = queryset.filter(user=User.objects.get(id=user_id), content_type__model='todo', object_id=todo_id).first()
+        return obj
     
     def perform_create(self, serializer):
         todo_id = self.kwargs.get('todo_id')
+        user_id = self.request.data.get('user')
         todo = Todo.objects.get(id=todo_id)
+
+        if Like.objects.filter(user=User.objects.get(id=user_id), content_type__model='todo', object_id=todo_id).exists():
+            raise ValidationError(f'User {user_id} has already liked this todo.')
+
         return serializer.save(liked_object=todo)
     
+    def perform_update(self, serializer):
+        todo_id = self.kwargs.get('todo_id')
+        emoji = self.request.data.get('emoji')
+        todo = Todo.objects.get(id=todo_id)
+
+        return serializer.save(liked_object=todo, emoji=emoji)
+
+class CommentLikeAPIView(CreateAPIView, UpdateAPIView):
+    serializer_class = LikeSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        return Like.objects.all()
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        comment_id = self.kwargs.get('comment_id')
+        user_id = self.request.data.get('user')
+        
+        obj = queryset.filter(user=User.objects.get(id=user_id), content_type__model='comment', object_id=comment_id).first()
+        return obj
+
+    
+    def perform_create(self, serializer):
+        comment_id = self.kwargs.get('comment_id')
+        comment = Comment.objects.get(id=comment_id)
+
+        return serializer.save(liked_object=comment)
+    
+    def perform_update(self, serializer):
+        comment_id = self.kwargs.get('comment_id')
+        emoji = self.request.data.get('emoji')
+        comment = Comment.objects.get(id=comment_id)
+
+        return serializer.save(liked_object=comment, emoji=emoji)
+
 class DiaryCommentAPIView(CreateAPIView):
     serializer_class = CommentSerializer
     permission_classes = [IsAuthenticated]
     
     def perform_create(self, serializer):
-        user_id = self.kwargs.get('user_id')
-        date = self.kwargs.get('date')
-        diary = Diary.objects.get(created_by_id=user_id, date=date)
+        diary_id = self.kwargs.get('diary_id')
+        diary = Diary.objects.get(id=diary_id)
         return serializer.save(commented_object=diary)
     
 class UserSearchAPIView(ListAPIView):
-    serializer_class = ProfileSerializer
+    serializer_class = ProfileSearchAndAllSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = SearchCursorPagination
 
@@ -483,13 +560,20 @@ class UserSearchAPIView(ListAPIView):
         return queryset
     
 class UserAllAPIView(ListAPIView):
-    serializer_class = ProfileSerializer
+    serializer_class = ProfileSearchAndAllSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = UserAllCursorPagination
     queryset = Profile.objects.all()
 
 class CommentDetailAPIView(RetrieveUpdateDestroyAPIView):
-    serializer_class = CommentSerializer
     permission_classes = [IsAuthenticated]
     queryset = Comment.objects.all()
     lookup_url_kwarg = 'comment_id'
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return CommentSerializer
+        elif self.request.method in ['PATCH', 'PUT']:
+            return CommentEditSerializer
+        return CommentSerializer  # Default serializer
+    
