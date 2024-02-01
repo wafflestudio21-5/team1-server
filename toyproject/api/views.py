@@ -39,10 +39,12 @@ from datetime import datetime
 
 from rest_framework.pagination import CursorPagination
 
-# class IsOwner(BasePermission):
-#     def has_permission(self, request, view):
-#         token_user = request.auth.user
-        
+
+from django.core.email import EmailMessage
+
+class IsUserToken(permissions.BasePermission):
+    def has_permission(self, request, view, obj):
+        return request.user == obj.user
 
 class CustomCursorPagination(CursorPagination):
     ordering = '-id'
@@ -261,15 +263,35 @@ class DeleteUserAPIView(RetrieveUpdateAPIView):
     def put(self, request, *args, **kwargs):
         user_id = self.kwargs.get('user_id')
         user = User.objects.get(id=user_id)
-        if user.password == request.data['password']:
-            user.delete()
+        user.delete()
+
+        return Response({
+            "result" : "SUCCESS",
+        }, status=status.HTTP_200_OK)
+
+
+class GetPassswordEmailAPIView(CreateAPIView):
+    serializer_class = EmailLoginSerializer
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        try: 
+            user = User.objects.get(email=request.data['email'])
+            email = EmailMessage(
+                'Your password',
+                user.password,
+                to=[user.email]
+            )
+            email.send()
             return Response({
                 "result" : "SUCCESS",
             }, status=status.HTTP_200_OK)
-        else:
+        except ObjectDoesNotExist:
             return Response({
-                "error_msg" : "Wrong password",
+                "error_msg" : "User with this email does not exist",
             }, status=status.HTTP_200_OK)
+
+
         
 # 1. create a separate ListAPIView for viewing other users' goals
 # 2. change ListCreateAPIView's permission_class to custom 

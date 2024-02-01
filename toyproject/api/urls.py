@@ -15,6 +15,8 @@ urlpatterns = [
     path('<int:user_id>/update/', views.UpdateLoginProfileAPIView.as_view()),
     path('<int:user_id>/delete', views.DeleteUserAPIView.as_view()),
 
+    path('password-send-email', views.PasswordSendEmailAPIView.as_view()),
+
     # profile / following_followers
     path('<int:user_id>', views.ProfileDetailAPIView.as_view()),
     path('<int:user_id>/follows', views.FollowRelationAPIView.as_view()),
