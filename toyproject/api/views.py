@@ -21,6 +21,7 @@ from .serializers import (  TodoSerializer,
                             KakaoLoginSerializer,
                             PasswordEmailSerializer,
                             TodoImageUploadSerializer,
+                            TodoImageArchiveSerializer
                         )
 from .models import Goal, Todo, Diary, User, Profile, Comment, Like
 
@@ -93,6 +94,16 @@ class DiaryCursorPagination(CursorPagination):
 class UserAllCursorPagination(CursorPagination):
     ordering = '-user_id'
     page_size = 20
+
+    def paginate_queryset(self, queryset, request, view=None):
+        if self.ordering:
+            queryset = queryset.order_by(self.ordering)
+
+        return super().paginate_queryset(queryset, request, view)
+
+class TodoImageArchiveCursorPagination(CursorPagination):
+    ordering = '-created_at'
+    page_size = 30
 
     def paginate_queryset(self, queryset, request, view=None):
         if self.ordering:
@@ -606,4 +617,13 @@ class TodoImageUploadAPIView(RetrieveUpdateAPIView):
     def perform_update(self, serializer):
         image = self.request.data.get('image')
         serializer.save(image=image)
-        
+
+class TodoImageAllAPIView(ListAPIView):
+    serializer_class = TodoImageArchiveSerializer
+    pagination_class = TodoImageArchiveCursorPagination
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        user = self.request.auth.user
+        todos_with_images = Todo.objects.filter(created_by=user)
+        return todos_with_images.exclude(image='')

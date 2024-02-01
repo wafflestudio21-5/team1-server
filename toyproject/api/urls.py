@@ -58,4 +58,7 @@ urlpatterns = [
     path('diarys/<int:diary_id>/comment', views.DiaryCommentAPIView.as_view()),
     path('comment-detail/<int:comment_id>', views.CommentDetailAPIView.as_view()),
 
+    # user todo images archive API views
+    path('image-all', views.TodoImageAllAPIView.as_view()),
+
 ]

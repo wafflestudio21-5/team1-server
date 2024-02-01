@@ -366,3 +366,21 @@ class TodoImageUploadSerializer(serializers.ModelSerializer):
         model = Todo
         fields = ['image']
 
+class TodoImageArchiveSerializer(serializers.ModelSerializer):
+
+    goal_color = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Todo
+        fields = [
+            'image',
+            'date',
+            'goal',
+            'goal_color',
+            'title',
+        ]
+    
+    def get_goal_color(self, obj):
+        return obj.goal.color
+    
+
