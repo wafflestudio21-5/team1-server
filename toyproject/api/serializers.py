@@ -204,7 +204,7 @@ class GoalSerializer(serializers.ModelSerializer):
     def get_todos(self, obj):
         todo_queryset = obj.todos.all()
         date_param = self.context.get('date')
-        if date_param.lower() == 'null':
+        if date_param == 'null':
             todos_serializer = TodoSerializer(todo_queryset.filter(date=None), many=True)
             return todos_serializer.data
         else:
@@ -220,11 +220,17 @@ class DiarySerializer(serializers.ModelSerializer):
     
     likes = LikeSerializer(many=True, read_only=True)
     comments = CommentSerializer(many=True, read_only=True)
+    username = serializers.SerializerMethodField()
+    profile_pic = serializers.SerializerMethodField()
+    tedoori = serializers.SerializerMethodField()
 
     class Meta:
         model = Diary
         fields = [
             'id',
+            'username',
+            'profile_pic',
+            'tedoori',
             'description',
             'visibility',
             'mood',
@@ -236,6 +242,21 @@ class DiarySerializer(serializers.ModelSerializer):
             'likes',
             'comments',
         ]
+    
+    def get_username(self, obj):
+        profile = Profile.objects.get(user_id=obj.created_by.id)
+        return profile.username
+    
+    def get_profile_pic(self, obj):
+        try:
+            profile = Profile.objects.get(user_id=obj.created_by.id)
+            return profile.profile_pic.url if profile.profile_pic else None
+        except FileNotFoundError:
+            return None
+        
+    def get_tedoori(self, obj):
+        todos_for_today = obj.created_by.todos.filter(date=datetime.today().strftime('%Y-%m-%d'))
+        return todos_for_today.exists() and todos_for_today.filter(is_completed=True).count() == todos_for_today.count()
 
 class FollowSerializer(serializers.ModelSerializer):
     

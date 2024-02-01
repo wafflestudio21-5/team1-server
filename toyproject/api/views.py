@@ -39,11 +39,10 @@ from datetime import datetime
 
 from rest_framework.pagination import CursorPagination
 
-class IsOwner(BasePermission):
-    def has_permission(self, request, view):
-        token_user_id = request.auth.user.id
-        view_user_id = view.kwargs.get('user_id', None)
-        return token_user_id == view_user_id      
+# class IsOwner(BasePermission):
+#     def has_permission(self, request, view):
+#         token_user = request.auth.user
+        
 
 class CustomCursorPagination(CursorPagination):
     ordering = '-id'
