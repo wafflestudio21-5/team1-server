@@ -426,7 +426,7 @@ class DiaryFeedListAPIView(ListAPIView):
         if request_user != user:
             raise PermissionDenied("You do not have permission to view this user's diary feed.")
         queryset = Diary.objects.filter((Q(created_by__in=user.following.all()) & Q(visibility='FL')) | Q(visibility='PB'))
-        return queryset
+        return queryset.filter(Q(created_by__kakao_id__isnull=False) | Q(created_by__email__isnull=False))
     
 class TodoFeedListAPIView(ListAPIView):
     serializer_class = ProfileTodoSerializer
@@ -439,7 +439,7 @@ class TodoFeedListAPIView(ListAPIView):
             Q(user__todos__goal__visibility='PB')
         ).distinct()
 
-        return queryset
+        return queryset.filter(Q(user__kakao_id__isnull=False) | Q(user__email__isnull=False))
 
 class TodoSearchAPIView(ListAPIView):
     serializer_class = ProfileTodoSearchSerializer
@@ -457,7 +457,7 @@ class TodoSearchAPIView(ListAPIView):
             num_matching_todos=Subquery(subquery)
         ).filter(num_matching_todos__gt=0).distinct()
 
-        return queryset
+        return queryset.filter(Q(user__kakao_id__isnull=False) | Q(user__email__isnull=False))
     
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -575,13 +575,15 @@ class UserSearchAPIView(ListAPIView):
     def get_queryset(self):
         username = self.request.query_params.get('username')
         queryset = Profile.objects.filter(username__icontains=username)
-        return queryset
+        return queryset.filter(Q(user__kakao_id__isnull=False) | Q(user__email__isnull=False))
     
 class UserAllAPIView(ListAPIView):
     serializer_class = ProfileSearchAndAllSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = UserAllCursorPagination
-    queryset = Profile.objects.all()
+    def get_queryset(self):
+        queryset = Profile.objects.all()
+        return queryset.filter(Q(user__kakao_id__isnull=False) | Q(user__email__isnull=False))
 
 class CommentDetailAPIView(RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
