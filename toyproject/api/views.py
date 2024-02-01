@@ -242,7 +242,7 @@ class UpdateLoginProfileAPIView(RetrieveUpdateAPIView):
         user = User.objects.get(id=user_id)
         request_user = self.request.auth.user
         if request_user != user:
-            raise PermissionDenied("You do not have permission to change this user's password.")
+            raise PermissionDenied("You do not have permission to update this user's profile.")
         return User.objects.get(id=user_id)
 
     def put(self, request, *args, **kwargs):
@@ -270,7 +270,7 @@ class DeleteUserAPIView(RetrieveUpdateAPIView):
         user = User.objects.get(id=user_id)
         request_user = self.request.auth.user
         if request_user != user:
-            raise PermissionDenied("You do not have permission to change this user's password.")
+            raise PermissionDenied("You do not have permission to delete this user.")
         user.delete()
         return Response({
             "result" : "SUCCESS",
@@ -311,7 +311,7 @@ class GoalListCreateAPIView(ListCreateAPIView):
         user = User.objects.get(id=user_id)
         request_user = self.request.auth.user
         if request_user != user:
-            raise PermissionDenied("You do not have permission to change this user's password.")
+            raise PermissionDenied("You do not have permission to create a goal for this user.")
         return serializer.save(created_by=User.objects.get(id=user_id))
 
     def get_queryset(self):
@@ -350,7 +350,7 @@ class TodoListCreateAPIView(ListCreateAPIView):
         user = User.objects.get(id=user_id)
         request_user = self.request.auth.user
         if request_user != user:
-            raise PermissionDenied("You do not have permission to change this user's password.")
+            raise PermissionDenied("You do not have permission to create a todo for this user.")
         return serializer.save(created_by=User.objects.get(id=user_id), goal=Goal.objects.get(id=goal_id))
     
     def get_queryset(self):
@@ -423,7 +423,7 @@ class DiaryFeedListAPIView(ListAPIView):
         user = User.objects.get(id=user_id)
         request_user = self.request.auth.user
         if request_user != user:
-            raise PermissionDenied("You do not have permission to change this user's password.")
+            raise PermissionDenied("You do not have permission to view this user's diary feed.")
         queryset = Diary.objects.filter((Q(created_by__in=user.following.all()) & Q(visibility='FL')) | Q(visibility='PB'))
         return queryset
     
