@@ -1,5 +1,5 @@
 from rest_framework.generics import UpdateAPIView, CreateAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView, RetrieveAPIView, RetrieveUpdateAPIView
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny, BasePermission
 from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin
 from rest_framework.authtoken.models import Token
 from .serializers import (  TodoSerializer,
@@ -38,6 +38,12 @@ from django.db.models import Q, OuterRef, Subquery, Count
 from datetime import datetime
 
 from rest_framework.pagination import CursorPagination
+
+class IsOwner(BasePermission):
+    def has_permission(self, request, view):
+        token_user_id = request.auth.user.id
+        view_user_id = view.kwargs.get('user_id', None)
+        return token_user_id == view_user_id      
 
 class CustomCursorPagination(CursorPagination):
     ordering = '-id'
@@ -335,16 +341,12 @@ class TodoDetailAPIView(RetrieveUpdateDestroyAPIView):
             raise Http404("Error: User not found")
         return Todo.objects.filter(created_by=user)
 
-# need custom permission_class
 class DiaryCreateAPIView(CreateAPIView):
     serializer_class = DiarySerializer
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        if self.request.user is User:
-            return serializer.save(created_by=self.request.user)
-        else:
-            return serializer.save(created_by=User.objects.get(id=3))
+        return serializer.save(created_by=self.request.auth.user)
     
 class DiaryListAPIView(ListAPIView):
     serializer_class = DiarySerializer
