@@ -24,7 +24,7 @@ from .serializers import (  TodoSerializer,
 from .models import Goal, Todo, Diary, User, Profile, Comment, Like
 
 from django.core.exceptions import ObjectDoesNotExist
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, PermissionDenied
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -210,6 +210,10 @@ class ChangePasswordAPIView(UpdateAPIView):
 
     def get_object(self):
         user_id = self.kwargs.get('user_id')
+        user = User.objects.get(id=user_id)
+        request_user = self.request.auth.user
+        if request_user != user:
+            raise PermissionDenied("You do not have permission to change this user's password.")
         return User.objects.get(id=user_id)
 
     def put(self, request, *args, **kwargs):
@@ -235,6 +239,10 @@ class UpdateLoginProfileAPIView(RetrieveUpdateAPIView):
 
     def get_object(self):
         user_id = self.kwargs.get('user_id')
+        user = User.objects.get(id=user_id)
+        request_user = self.request.auth.user
+        if request_user != user:
+            raise PermissionDenied("You do not have permission to change this user's password.")
         return User.objects.get(id=user_id)
 
     def put(self, request, *args, **kwargs):
@@ -260,6 +268,9 @@ class DeleteUserAPIView(RetrieveUpdateAPIView):
     def get_object(self):
         user_id = self.kwargs.get('user_id')
         user = User.objects.get(id=user_id)
+        request_user = self.request.auth.user
+        if request_user != user:
+            raise PermissionDenied("You do not have permission to change this user's password.")
         user.delete()
         return Response({
             "result" : "SUCCESS",
@@ -297,6 +308,10 @@ class GoalListCreateAPIView(ListCreateAPIView):
 
     def perform_create(self, serializer):
         user_id = self.kwargs.get('user_id')
+        user = User.objects.get(id=user_id)
+        request_user = self.request.auth.user
+        if request_user != user:
+            raise PermissionDenied("You do not have permission to change this user's password.")
         return serializer.save(created_by=User.objects.get(id=user_id))
 
     def get_queryset(self):
@@ -332,6 +347,10 @@ class TodoListCreateAPIView(ListCreateAPIView):
     def perform_create(self, serializer):
         goal_id = self.kwargs.get('goal_id')
         user_id = self.kwargs.get('user_id')
+        user = User.objects.get(id=user_id)
+        request_user = self.request.auth.user
+        if request_user != user:
+            raise PermissionDenied("You do not have permission to change this user's password.")
         return serializer.save(created_by=User.objects.get(id=user_id), goal=Goal.objects.get(id=goal_id))
     
     def get_queryset(self):
@@ -402,6 +421,9 @@ class DiaryFeedListAPIView(ListAPIView):
     def get_queryset(self):
         user_id = self.kwargs.get('user_id')
         user = User.objects.get(id=user_id)
+        request_user = self.request.auth.user
+        if request_user != user:
+            raise PermissionDenied("You do not have permission to change this user's password.")
         queryset = Diary.objects.filter((Q(created_by__in=user.following.all()) & Q(visibility='FL')) | Q(visibility='PB'))
         return queryset
     
