@@ -715,8 +715,13 @@ class TodoTodayAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
+        request_user = self.request.auth.user
         user_id = self.kwargs.get('user_id')
+        user = User.objects.get(id=user_id)
         today = datetime.now()
-        goals_with_todos_today = Goal.objects.filter(Q(created_by=user_id) & Q(todos__date=today.strftime('%Y-%m-%d'))).distinct()
+        if request_user == user:
+            goals_with_todos_today = Goal.objects.filter(Q(created_by=user_id) & Q(todos__date=today.strftime('%Y-%m-%d'))).distinct()
+        else:
+            goals_with_todos_today = Goal.objects.filter((Q(created_by=user_id) & Q(todos__date=today.strftime('%Y-%m-%d'))) & (Q(visibility='PB') | (Q(visibility='FL') & Q(created_by__followers=request_user)))).distinct()
         return goals_with_todos_today
     
