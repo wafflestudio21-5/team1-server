@@ -23,7 +23,7 @@ from .serializers import (  TodoSerializer,
                             TodoImageUploadSerializer,
                             TodoImageArchiveSerializer,
                             UserFollowUnfollowSerializer,
-                            FollowSerializer,
+                            TodoTodaySerializer,
                         )
 from .models import Goal, Todo, Diary, User, Profile, Comment, Like
 
@@ -686,3 +686,13 @@ class UserUnfollowAPIView(UpdateAPIView):
         request_user.following.remove(user_to_unfollow)
 
         return Response({'result': f'User {request_user} has unfollowed {user_to_unfollow}.'}, status=status.HTTP_200_OK)
+    
+class TodoTodayAPIView(ListAPIView):
+    serializer_class = TodoTodaySerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        user_id = self.kwargs.get('user_id')
+        today = datetime.now()
+        goals_with_todos_today = Goal.objects.filter(Q(created_by=user_id) & Q(todos__date=today.strftime('%Y-%m-%d'))).distinct()
+        return goals_with_todos_today

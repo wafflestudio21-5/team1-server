@@ -40,6 +40,9 @@ urlpatterns = [
     path('<int:user_id>/goals/<int:goal_id>/todos', views.TodoListCreateAPIView.as_view()),
     path('<int:user_id>/goals/<int:goal_id>/todos/<int:todo_id>', views.TodoDetailAPIView.as_view()),
 
+    # todos today API view
+    path('<int:user_id>/todos-today', views.TodoTodayAPIView.as_view()),
+
     # todo shortcut: image upload API view
     path('image-upload/<int:todo_id>', views.TodoImageUploadAPIView.as_view()),
     

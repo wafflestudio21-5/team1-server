@@ -395,3 +395,47 @@ class TodoImageArchiveSerializer(serializers.ModelSerializer):
 class UserFollowUnfollowSerializer(serializers.Serializer):
     user_to_follow = serializers.IntegerField(write_only=True)
 
+class TodoConciseSerializer(serializers.ModelSerializer):
+    
+    likes = LikeSerializer(many=True, read_only=True)
+    color = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Todo
+        fields = [
+            'id',
+            'title',
+            'color', 
+            'description',
+            'date',
+            'is_completed',
+            'likes',
+            'image'
+        ]
+    
+    def get_color(self, obj):
+        color = obj.goal.color
+        return color
+
+class TodoTodaySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Goal
+        fields = [
+            'title',
+            'color',
+            'visibility',
+        ]
+
+    def to_representation(self, instance):
+        today = datetime.now()
+        todos_queryset = instance.todos.filter(date=today.strftime('%Y-%m-%d'))
+
+        todos_serializer = TodoConciseSerializer(todos_queryset, many=True)
+
+        representation = super().to_representation(instance)
+        representation['todos'] = todos_serializer.data
+
+        return representation
+
+
