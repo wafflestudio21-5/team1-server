@@ -424,11 +424,34 @@ class DiaryDetailAPIView(RetrieveUpdateDestroyAPIView):
         return obj
 
     
-class FollowRelationAPIView(RetrieveAPIView):
+class FollowRelationAPIView(RetrieveAPIView, UpdateAPIView):
     serializer_class = FollowRelationSerializer
     permission_classes = [IsAuthenticated]
-    queryset = User.objects.all()
-    lookup_url_kwarg = 'user_id'
+
+    def get_object(self):
+        user_id = self.kwargs.get('user_id')
+        return User.objects.get(id=user_id)
+    
+    def get_queryset(self):
+        request_user = self.get_object()
+        return request_user.followers.all()
+
+    def put(self, serializer, *args, **kwargs):
+        user = self.get_object()
+        user_followers = self.get_queryset()
+        user_to_remove = self.request.data.get('user_to_remove')
+        filtered_qs = user_followers.filter(id=user_to_remove)
+
+        request_user = self.request.auth.user
+        if request_user != user:
+            raise PermissionDenied("You do not have permission to delete followers for this user.")
+
+        if not filtered_qs.exists():
+            raise UserAlreadyFollowedException(f'User {user_to_remove} is not in User {user}\'s followers list.')
+        
+        user.followers.remove(user_to_remove)
+
+        return Response({'result': f'User {user_to_remove} has been removed from User {user}\'s followers list.'}, status=status.HTTP_200_OK)
 
 class ProfileDetailAPIView(RetrieveUpdateAPIView):
     serializer_class = ProfileSerializer
@@ -696,3 +719,4 @@ class TodoTodayAPIView(ListAPIView):
         today = datetime.now()
         goals_with_todos_today = Goal.objects.filter(Q(created_by=user_id) & Q(todos__date=today.strftime('%Y-%m-%d'))).distinct()
         return goals_with_todos_today
+    
