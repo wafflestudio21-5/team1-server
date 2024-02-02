@@ -14,7 +14,7 @@
 
 ---
 
-## Contributers
+## Contributors
 
 | <img src="WatomateServerb5a0fbf282184bd382d60519ffa770f2/Untitled1.png" width="300px"> | <img src="WatomateServerb5a0fbf282184bd382d60519ffa770f2/Untitled2.png" width="300px"> |
 |:--:|:--:|
@@ -71,9 +71,11 @@ pip install -r requirements.txt
 
 ---
 
-## Model
+## DB Schema / Entity-relationship Diagram
 
 ![Untitled](WatomateServerb5a0fbf282184bd382d60519ffa770f2/Untitled3.png)
+
+- Made using Lucid Chart (https://lucid.app/)
 
 ---
 
