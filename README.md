@@ -16,12 +16,10 @@
 
 ## Contributers
 
-![Untitled](WatomateServerb5a0fbf282184bd382d60519ffa770f2/Untitled1.png) | ![Untitled](WatomateServerb5a0fbf282184bd382d60519ffa770f2/Untitled2.png)
+| <img src="WatomateServerb5a0fbf282184bd382d60519ffa770f2/Untitled1.png" width="300px"> | <img src="WatomateServerb5a0fbf282184bd382d60519ffa770f2/Untitled2.png" width="300px"> 
 
-<aside>
 💡 [임지한](https://github.com/jhlim101/) | 💡 [강민성](https://github.com/jhlim101)
 
-</aside>
 
 
 ---
