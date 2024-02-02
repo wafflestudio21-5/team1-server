@@ -113,7 +113,7 @@ class UserAllCursorPagination(CursorPagination):
         return super().paginate_queryset(queryset, request, view)
 
 class TodoImageArchiveCursorPagination(CursorPagination):
-    ordering = '-created_at'
+    ordering = '-date'
     page_size = 30
 
     def paginate_queryset(self, queryset, request, view=None):
