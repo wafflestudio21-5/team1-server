@@ -16,7 +16,7 @@
 
 ## Contributers
 
-![Untitled](WatomateServerb5a0fbf282184bd382d60519ffa770f2/Untitled1.jpg)
+![Untitled](WatomateServerb5a0fbf282184bd382d60519ffa770f2/Untitled1.png)
 
 <aside>
 💡 [임지한](https://github.com/jhlim101/)
