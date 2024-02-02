@@ -61,6 +61,7 @@ class ProfileConciseSerializer(serializers.ModelSerializer):
         fields = [
             'username',
             'profile_pic',
+            'intro',
             'tedoori',
         ]
 
