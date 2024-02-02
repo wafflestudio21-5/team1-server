@@ -369,13 +369,14 @@ class TodoImageUploadSerializer(serializers.ModelSerializer):
 class TodoImageArchiveSerializer(serializers.ModelSerializer):
 
     goal_color = serializers.SerializerMethodField()
+    goal_title = serializers.SerializerMethodField()
 
     class Meta:
         model = Todo
         fields = [
             'image',
             'date',
-            'goal',
+            'goal_title',
             'goal_color',
             'title',
         ]
@@ -383,4 +384,9 @@ class TodoImageArchiveSerializer(serializers.ModelSerializer):
     def get_goal_color(self, obj):
         return obj.goal.color
     
+    def get_goal_title(self, obj):
+        return obj.goal.title
+    
+class UserFollowUnfollowSerializer(serializers.Serializer):
+    user_to_follow = serializers.IntegerField(write_only=True)
 

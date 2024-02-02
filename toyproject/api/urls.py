@@ -21,6 +21,10 @@ urlpatterns = [
     path('<int:user_id>', views.ProfileDetailAPIView.as_view()),
     path('<int:user_id>/follows', views.FollowRelationAPIView.as_view()),
 
+    # follow / unfollow API view
+    path('follow', views.UserFollowAPIView.as_view()),
+    path('unfollow', views.UserUnfollowAPIView.as_view()),
+
     # profile search API view
     path('user-search', views.UserSearchAPIView.as_view()),
 

@@ -21,7 +21,9 @@ from .serializers import (  TodoSerializer,
                             KakaoLoginSerializer,
                             PasswordEmailSerializer,
                             TodoImageUploadSerializer,
-                            TodoImageArchiveSerializer
+                            TodoImageArchiveSerializer,
+                            UserFollowUnfollowSerializer,
+                            FollowSerializer,
                         )
 from .models import Goal, Todo, Diary, User, Profile, Comment, Like
 
@@ -30,6 +32,7 @@ from rest_framework.exceptions import ValidationError, PermissionDenied
 
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.exceptions import APIException
 
 from django.http import Http404
 
@@ -42,6 +45,14 @@ from datetime import datetime
 from rest_framework.pagination import CursorPagination
 
 from django.core.mail import EmailMessage
+
+class UserAlreadyFollowedException(APIException):
+    status_code = 400
+    default_detail = "User has already been followed."
+
+class UserAlreadyFollowedException(APIException):
+    status_code = 400
+    default_detail = "User is not following the other user."
 
 class IsRefreshToken(BasePermission):
     def has_permission(self, request, view, obj):
@@ -627,3 +638,51 @@ class TodoImageAllAPIView(ListAPIView):
         user = self.request.auth.user
         todos_with_images = Todo.objects.filter(created_by=user)
         return todos_with_images.exclude(image='')
+
+class UserFollowAPIView(UpdateAPIView):
+    serializer_class = UserFollowUnfollowSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        request_user_id = self.request.auth.user.id
+        return User.objects.get(id=request_user_id)
+    
+    def get_queryset(self):
+        request_user = self.get_object()
+        return request_user.following.all()
+
+    def put(self, serializer):
+        request_user = self.get_object()
+        request_user_following = self.get_queryset()
+        user_to_follow = self.request.data.get('user_to_follow')
+        filtered_qs = request_user_following.filter(id=user_to_follow)
+
+        if filtered_qs.exists():
+            raise UserAlreadyFollowedException(f'User {request_user} is already following {user_to_follow}.')
+        request_user.following.add(user_to_follow)
+
+        return Response({'result': f'User {request_user} is now following {user_to_follow}.'}, status=status.HTTP_200_OK)
+
+class UserUnfollowAPIView(UpdateAPIView):
+    serializer_class = UserFollowUnfollowSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        request_user_id = self.request.auth.user.id
+        return User.objects.get(id=request_user_id)
+    
+    def get_queryset(self):
+        request_user = self.get_object()
+        return request_user.following.all()
+
+    def put(self, serializer):
+        request_user = self.get_object()
+        request_user_following = self.get_queryset()
+        user_to_unfollow = self.request.data.get('user_to_unfollow')
+        filtered_qs = request_user_following.filter(id=user_to_unfollow)
+
+        if not filtered_qs.exists():
+            raise UserAlreadyFollowedException(f'User {request_user} is already not following User {user_to_unfollow}.')
+        request_user.following.remove(user_to_unfollow)
+
+        return Response({'result': f'User {request_user} has unfollowed {user_to_unfollow}.'}, status=status.HTTP_200_OK)
