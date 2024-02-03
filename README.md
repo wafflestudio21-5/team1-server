@@ -30,6 +30,10 @@ Goal:
 - Long-term objectives, used to organize and group todos
 - Visibility can be set to Public, Private, or Followers Only
 
+![Untitled](WatomateServerb5a0fbf282184bd382d60519ffa770f2/Untitled6.png)
+
+![Untitled](WatomateServerb5a0fbf282184bd382d60519ffa770f2/Untitled7.png)
+
 Todo:
 - Short-term objectives set by the user
 - Todos can be created in two ways:
@@ -38,12 +42,20 @@ Todo:
 - Calendar in the Home page displays how many todos there are left for each day
 - Includes like (reaction) feature from other users
 
+![Untitled](WatomateServerb5a0fbf282184bd382d60519ffa770f2/Untitled8.png)
+
+![Untitled](WatomateServerb5a0fbf282184bd382d60519ffa770f2/Untitled9.png)
+
+![Untitled](WatomateServerb5a0fbf282184bd382d60519ffa770f2/Untitled10.png)
+
 Diary:
 - Reflections that users can post daily
 - Same visibility feature as Goal (Public, Private, Followers)
 - Includes mood meter and emoji feature
 - Other users can comment on posted diaries
 - Diary ‘Feed’ feature
+
+![Untitled](WatomateServerb5a0fbf282184bd382d60519ffa770f2/Untitled13.png)
 
 
 ---
@@ -54,6 +66,9 @@ Additional Features
 - Users can post photos (인증샷) on each todo after completed. These are displayed in the Todo Feed page
 - Comments can be added on both Diaries and Todos
 
+![Untitled](WatomateServerb5a0fbf282184bd382d60519ffa770f2/Untitled11.png)
+
+![Untitled](WatomateServerb5a0fbf282184bd382d60519ffa770f2/Untitled12.png)
 
 ---
 
@@ -101,6 +116,12 @@ wcwidth==0.1.9
 ```jsx
 pip install -r requirements.txt
 ```
+
+## Other Tools:
+
+- AWS EC2 Instance (Free Tier)
+- Amazon RDS for MySQL (Free Tier)
+- Postman (for testing API)
 
 ---
 
