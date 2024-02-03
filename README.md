@@ -139,6 +139,8 @@ pip install -r requirements.txt
 
 ![Untitled](WatomateServerb5a0fbf282184bd382d60519ffa770f2/Untitled5.png)
 
+- Document generated using drf-spectacular, an OpenAPI 3 schema generator for the Django REST framework.
+
 - You can check the details of urls in the url down below after opening the local server.
 
 ```jsx
