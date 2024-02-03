@@ -24,6 +24,39 @@
 
 ---
 
+## Features (cloned from app)
+
+Goal:
+- Long-term objectives, used to organize and group todos
+- Visibility can be set to Public, Private, or Followers Only
+
+Todo:
+- Short-term objectives set by the user
+- Todos can be created in two ways:
+   - in the Home Page, where they are immediately assigned a specific date by the user,
+   - or in the My Page, where they act as a memo space before the user decides when to do something. (assign today, assign tomorrow etc.)
+- Calendar in the Home page displays how many todos there are left for each day
+- Includes like (reaction) feature from other users
+
+Diary:
+- Reflections that users can post daily
+- Same visibility feature as Goal (Public, Private, Followers)
+- Includes mood meter and emoji feature
+- Other users can comment on posted diaries
+- Diary ‘Feed’ feature
+
+
+---
+
+Additional Features
+
+- Added a frame (테두리) that displays on User’s profile picture if they complete all todos assigned today
+- Users can post photos (인증샷) on each todo after completed. These are displayed in the Todo Feed page
+- Comments can be added on both Diaries and Todos
+
+
+---
+
 ## Used Tech Stack
 
 ```jsx
